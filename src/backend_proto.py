@@ -61,4 +61,61 @@ def batch_extractor(images_path):
 
 
 # temporary extractor buat ngetes
-result = batch_extractor("..\\test\\training_set")
+# result = batch_extractor("..\\test\\training_set")
+
+# QR DECOMPOSITION
+def norm(x):
+    result = 0
+    for i in x:
+        result += (i**2)
+    result = result ** (1/2)
+    return result
+
+
+def proj(u, v):
+    result = 0
+    norm_u2 = norm(u) ** 2
+    for i in range(len(u)):
+        result += (u[i] * v[i])
+    result /= norm_u2
+    result = np.multiply(result, u)
+    return result
+
+
+def qrGetQ(matrix):
+    n = len(matrix)
+    result = [[0 for i in range(n)] for j in range(n)]
+    result = np.reshape(result, (n, n))
+    result = result.astype('float')
+    arrTemp = [0 for i in range(n)]
+    for i in range(len(matrix)):
+        arrTemp = np.array(matrix[:, i])
+        arrTemp = np.reshape(arrTemp, n)
+        for j in range(0, i):
+            u = np.array(result[:, j])
+            u = np.reshape(u, n)
+            arrTemp = np.subtract(arrTemp, proj(u, arrTemp))
+        for k in range(n):
+            result[k][i] = arrTemp[k]
+    for x in range(n):
+        arrTemp = np.array(result[:, x])
+        arrTemp = np.reshape(arrTemp, n)
+        arrTemp = np.divide(arrTemp, norm(arrTemp))
+        for y in range(n):
+            result[y][x] = arrTemp[y]
+    return result
+
+
+def qrGetR(g, matrix):
+    result = np.matmul(np.transpose(g), matrix)
+    return result
+
+
+def cekTriangle(matrix):
+    triangle = 1
+    n = len(matrix)
+    for i in range(1, n):
+        for j in range(0, i):
+            if (matrix[i][j] > 0.0001):
+                triangle = 0
+    return triangle

@@ -106,8 +106,12 @@ def qrGetQ(matrix):
     return result
 
 
-def qrGetR(g, matrix):
-    result = np.matmul(np.transpose(g), matrix)
+def qrGetR(q, matrix):
+    n = len(matrix)
+    result = [[0 for i in range(n)] for j in range(n)]
+    result = np.reshape(result, (n, n))
+    transpose = np.transpose(q)
+    result = np.matmul(transpose, matrix)
     return result
 
 
@@ -119,3 +123,21 @@ def cekTriangle(matrix):
             if (matrix[i][j] > 0.0001):
                 triangle = 0
     return triangle
+
+
+def getEigenDiagonal(matrix):
+    triangle = 0
+    while (triangle == 0):
+        q = qrGetQ(matrix)
+        r = qrGetR(q, matrix)
+        x = np.matmul(r, q)
+        n = len(matrix)
+        triangle = cekTriangle(x)
+        if (triangle == 0):
+            matrix = x
+    eigenVal = [0 for i in range(n)]
+    eigenVal = np.array(eigenVal)
+    eigenVal = eigenVal.astype('float')
+    for i in range(n):
+        eigenVal[i] = x[i][i]
+    return eigenVal

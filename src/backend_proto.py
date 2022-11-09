@@ -120,7 +120,7 @@ def cekTriangle(matrix):
     n = len(matrix)
     for i in range(1, n):
         for j in range(0, i):
-            if (matrix[i][j] > 0.0001):
+            if (matrix[i][j] > 0.0001 or matrix[i][j] < -0.0001):
                 triangle = 0
     return triangle
 

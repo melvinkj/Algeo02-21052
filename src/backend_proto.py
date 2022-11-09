@@ -1,9 +1,11 @@
 import cv2 as cv
 import numpy as np
+import sympy as sp
+from sympy import Matrix
 import scipy
 from matplotlib.pyplot import imread
 import pickle as pickle
-from scipy import spatial
+# from scipy import spatial
 import random
 import os
 import math
@@ -141,3 +143,69 @@ def getEigenDiagonal(matrix):
     for i in range(n):
         eigenVal[i] = x[i][i]
     return eigenVal
+
+def getEigenSpace(matrix):
+    # eigenVal = [3,-1]
+    # eigenVal = [4,-2]
+    # eigenVal = [5,5,1]
+    # eigenVal = [3, 2]
+    # eigenVal = [1,1,1]
+    # eigenVal = [3,2,1]
+    # eigenVal = [3,2]
+    
+    eigenVal = getEigenDiagonal(matrix)
+    n = len(matrix)
+    identity = np.identity(n)
+    for i in range(n):  
+        lamda = eigenVal[i]
+
+        # Generating lamda.I Matrix
+        lamdaI = lamda * identity
+
+        # Generating lamda.I - A Matrix
+        m = np.subtract(lamdaI, matrix)
+        m = Matrix(m)
+
+        # Getting Nullspace of m to Solve Parametric Equation
+        v = m.nullspace()
+        v = Matrix(v)
+
+
+        # Inserting Eigen Vector to Eigen Space
+        if (i == 0) :
+            e = v
+            if(len(v)>n):
+                e = v[:n]
+        else :            
+            if(len(v)>n):
+                v = v[i*n:(i+1)*n]
+                # e = np.concatenate((e,v), axis = 1)
+                # e = np.hstack(e,v)
+                e = np.c_[e,v]
+            else :
+                # e = np.concatenate((e,v), axis = 1)
+                # e = np.hstack(e,v)
+                e = np.c_[e,v]
+
+    return e
+
+'''
+# TEST CASES FOR getEigenSpace
+# e = getEigenVectors([[3,0],[8,-1]])
+# e = getEigenVectors([[1,3],[3,1]])
+# e = getEigenVectors([[3,-2,0],[-2,3,0],[0,0,5]])
+# e = getEigenVectors([[1,-2],[1,4]])
+# e = getEigenVectors([[0.5,0.25,0.25],[0.25,0.5,0.25],[0.25,0.25,0.5]])
+# e = getEigenVectors([[4,0,1],[-2,1,0],[-2,0,1]])
+# e = getEigenVectors([[1,-2],[1,4]])
+
+# print(e)
+'''
+    
+
+    
+
+
+
+
+    

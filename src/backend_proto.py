@@ -142,26 +142,27 @@ def getEigenDiagonal(matrix):
     eigenVal = eigenVal.astype('float')
     for i in range(n):
         eigenVal[i] = x[i][i]
+        eigenVal[i] = round(eigenVal[i], 3)
     return eigenVal
 
+
 def getEigenSpace(matrix):
-    # eigenVal = [3,-1]
+    # eigenVal = [3, -1]
     # eigenVal = [4,-2]
     # eigenVal = [5,5,1]
     # eigenVal = [3, 2]
     # eigenVal = [1,1,1]
     # eigenVal = [3,2,1]
     # eigenVal = [3,2]
-    
+
     eigenVal = getEigenDiagonal(matrix)
     n = len(matrix)
     identity = np.identity(n)
-    for i in range(n):  
+    for i in range(n):
         lamda = eigenVal[i]
 
         # Generating lamda.I Matrix
         lamdaI = lamda * identity
-
         # Generating lamda.I - A Matrix
         m = np.subtract(lamdaI, matrix)
         m = Matrix(m)
@@ -170,28 +171,32 @@ def getEigenSpace(matrix):
         v = m.nullspace()
         v = Matrix(v)
 
-
         # Inserting Eigen Vector to Eigen Space
-        if (i == 0) :
+        if (i == 0):
             e = v
-            if(len(v)>n):
+            if (len(v) > n):
                 e = v[:n]
-        else :            
-            if(len(v)>n):
+        else:
+            if (len(v) > n):
                 v = v[i*n:(i+1)*n]
                 # e = np.concatenate((e,v), axis = 1)
                 # e = np.hstack(e,v)
-                e = np.c_[e,v]
-            else :
+                e = np.c_[e, v]
+            else:
                 # e = np.concatenate((e,v), axis = 1)
                 # e = np.hstack(e,v)
-                e = np.c_[e,v]
+                e = np.c_[e, v]
 
     return e
 
+# TEST
+# x = np.array([[3, 0], [8, -1]])
+# print(getEigenSpace(x))
+
+
 '''
 # TEST CASES FOR getEigenSpace
-# e = getEigenVectors([[3,0],[8,-1]])
+e = getEigenVectors([[3,0],[8,-1]])
 # e = getEigenVectors([[1,3],[3,1]])
 # e = getEigenVectors([[3,-2,0],[-2,3,0],[0,0,5]])
 # e = getEigenVectors([[1,-2],[1,4]])
@@ -201,11 +206,3 @@ def getEigenSpace(matrix):
 
 # print(e)
 '''
-    
-
-    
-
-
-
-
-    

@@ -49,23 +49,56 @@ result = {}
 
 def batch_extractor(images_path):
     result = {}
-    folders = [os.path.join(images_path, p)
-               for p in sorted(os.listdir(images_path))]
+    folder = [os.path.join(images_path, p)
+              for p in sorted(os.listdir(images_path))]
 
     i = 0
-    for f in folders:
-        files = [os.path.join(f, i) for i in sorted(os.listdir(f))]
-        for n in files:
-            name = n.split('\\')[-1]
-            print('Extracting features from image %s' % name)
-            result[name] = extract_features(n)
+    fileCount = 0
+    for file in folder:
+        # name = file.split('\\')[-1]
+        # print('Extracting features from image %s' % name)
+        result[fileCount] = extract_features(file)
+        fileCount += 1
     return result
 
 
 # temporary extractor buat ngetes
-# result = batch_extractor("..\\test\\training_set")
+# result = batch_extractor("..\\test\\training_set\\")
+
+
+# MEAN
+def mean(extraction_result):
+    m = len(extraction_result)
+    mean = [0 for i in range(2048)]
+    for i in range(m):
+        mean = np.add(mean, extraction_result[i])
+    mean = np.divide(mean, m)
+    return mean
+
+# SELISIH (PHI)
+
+
+def A(extraction_result, mean):
+    m = len(extraction_result)
+    A = [[0 for i in range(2048)] for j in range(m)]
+    for i in range(m):
+        A[i] = extraction_result[i] - mean
+    return A
+
+# MATRIX KOVARIAN
+
+
+def kovarian(A):
+    kovarian = np.matmul(A, np.transpose(A))
+    n = len(kovarian)
+    for i in range(n):
+        for j in range(n):
+            kovarian[i][j] = round(kovarian[i][j], 3)
+    return kovarian
 
 # QR DECOMPOSITION
+
+
 def norm(x):
     result = 0
     for i in x:
@@ -189,9 +222,11 @@ def getEigenSpace(matrix):
 
     return e
 
+
 # TEST
-# x = np.array([[3, 0], [8, -1]])
-# print(getEigenSpace(x))
+# x = np.array([[1, -2], [1, 4]])
+# print(getEigenDiagonal(x))
+# print(getEigenDiagonal(x))
 
 
 '''

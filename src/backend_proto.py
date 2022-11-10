@@ -1,9 +1,11 @@
 import cv2 as cv
 import numpy as np
+import sympy as sp
+from sympy import Matrix
 import scipy
 from matplotlib.pyplot import imread
 import pickle as pickle
-from scipy import spatial
+# from scipy import spatial
 import random
 import os
 import math
@@ -47,23 +49,56 @@ result = {}
 
 def batch_extractor(images_path):
     result = {}
-    folders = [os.path.join(images_path, p)
-               for p in sorted(os.listdir(images_path))]
+    folder = [os.path.join(images_path, p)
+              for p in sorted(os.listdir(images_path))]
 
     i = 0
-    for f in folders:
-        files = [os.path.join(f, i) for i in sorted(os.listdir(f))]
-        for n in files:
-            name = n.split('\\')[-1]
-            print('Extracting features from image %s' % name)
-            result[name] = extract_features(n)
+    fileCount = 0
+    for file in folder:
+        # name = file.split('\\')[-1]
+        # print('Extracting features from image %s' % name)
+        result[fileCount] = extract_features(file)
+        fileCount += 1
     return result
 
 
 # temporary extractor buat ngetes
-# result = batch_extractor("..\\test\\training_set")
+# result = batch_extractor("..\\test\\training_set\\")
+
+
+# MEAN
+def mean(extraction_result):
+    m = len(extraction_result)
+    mean = [0 for i in range(2048)]
+    for i in range(m):
+        mean = np.add(mean, extraction_result[i])
+    mean = np.divide(mean, m)
+    return mean
+
+# SELISIH (PHI)
+
+
+def A(extraction_result, mean):
+    m = len(extraction_result)
+    A = [[0 for i in range(2048)] for j in range(m)]
+    for i in range(m):
+        A[i] = extraction_result[i] - mean
+    return A
+
+# MATRIX KOVARIAN
+
+
+def kovarian(A):
+    kovarian = np.matmul(A, np.transpose(A))
+    n = len(kovarian)
+    for i in range(n):
+        for j in range(n):
+            kovarian[i][j] = round(kovarian[i][j], 3)
+    return kovarian
 
 # QR DECOMPOSITION
+
+
 def norm(x):
     result = 0
     for i in x:
@@ -140,4 +175,69 @@ def getEigenDiagonal(matrix):
     eigenVal = eigenVal.astype('float')
     for i in range(n):
         eigenVal[i] = x[i][i]
+        eigenVal[i] = round(eigenVal[i], 3)
     return eigenVal
+
+
+def getEigenSpace(matrix):
+    # eigenVal = [3, -1]
+    # eigenVal = [4,-2]
+    # eigenVal = [5,5,1]
+    # eigenVal = [3, 2]
+    # eigenVal = [1,1,1]
+    # eigenVal = [3,2,1]
+    # eigenVal = [3,2]
+
+    eigenVal = getEigenDiagonal(matrix)
+    n = len(matrix)
+    identity = np.identity(n)
+    for i in range(n):
+        lamda = eigenVal[i]
+
+        # Generating lamda.I Matrix
+        lamdaI = lamda * identity
+        # Generating lamda.I - A Matrix
+        m = np.subtract(lamdaI, matrix)
+        m = Matrix(m)
+
+        # Getting Nullspace of m to Solve Parametric Equation
+        v = m.nullspace()
+        v = Matrix(v)
+
+        # Inserting Eigen Vector to Eigen Space
+        if (i == 0):
+            e = v
+            if (len(v) > n):
+                e = v[:n]
+        else:
+            if (len(v) > n):
+                v = v[i*n:(i+1)*n]
+                # e = np.concatenate((e,v), axis = 1)
+                # e = np.hstack(e,v)
+                e = np.c_[e, v]
+            else:
+                # e = np.concatenate((e,v), axis = 1)
+                # e = np.hstack(e,v)
+                e = np.c_[e, v]
+
+    return e
+
+
+# TEST
+# x = np.array([[1, -2], [1, 4]])
+# print(getEigenDiagonal(x))
+# print(getEigenDiagonal(x))
+
+
+'''
+# TEST CASES FOR getEigenSpace
+e = getEigenVectors([[3,0],[8,-1]])
+# e = getEigenVectors([[1,3],[3,1]])
+# e = getEigenVectors([[3,-2,0],[-2,3,0],[0,0,5]])
+# e = getEigenVectors([[1,-2],[1,4]])
+# e = getEigenVectors([[0.5,0.25,0.25],[0.25,0.5,0.25],[0.25,0.25,0.5]])
+# e = getEigenVectors([[4,0,1],[-2,1,0],[-2,0,1]])
+# e = getEigenVectors([[1,-2],[1,4]])
+
+# print(e)
+'''

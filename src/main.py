@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter.ttk import Button
 from tkinter import *
 from submain import *
+from backend_proto import *
 # from cam import *
 import os
 
@@ -132,6 +133,24 @@ def MainPage():
         global userImageName
         global dataSetName
         extraction_result = batch_extractor(dataSetName)
+        M = len(extraction_result)
+        average = mean(extraction_result)
+        a = A(extraction_result, average)
+        cov = kovarian(a)
+        eigenSpace = getEigenSpace(cov)
+        k = 10
+        eigenFaces = getEigenFaces(eigenSpace, a, k)
+        weightSet = getWeightSet(a, eigenFaces, M, k )
+        threshold = getThreshold(weightSet, M)
+        match = True
+        index = 0
+        matcher(userImageName, average, weightSet, M, threshold, eigenFaces, match, index)
+        if(match == True):
+            print("Wajah yang paling cocok adalah wajah dengan index ke-" + index)
+        else :
+            print("Tidak ada wajah yang cocok.")
+
+
         # print(extraction_result)
         # print(userImageName)
     startBtn = Button(leftContainer, text="Start Program", font=(

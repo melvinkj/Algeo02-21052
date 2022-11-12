@@ -89,12 +89,80 @@ def A(extraction_result, mean):
 
 
 def kovarian(A):
-    kovarian = np.matmul(A, np.transpose(A))
+    kovarian = np.matmul(np.transpose(A),A)
     n = len(kovarian)
     for i in range(n):
         for j in range(n):
             kovarian[i][j] = round(kovarian[i][j], 3)
     return kovarian
+
+# EIGENFACE ALGORITHM
+
+def eigenfaces(images_path):
+    vectorface = batch_extractor(images_path)
+    average = mean(vectorface)
+    selisih = A(vectorface, average)
+    cov = kovarian(selisih)
+    eigenSpace = getEigenSpace(cov)
+    oriEigenSpace = np.matmul(selisih, eigenSpace)
+    k = 10
+    best = oriEigenSpace[0:, 0:k]
+
+    return best
+
+# WEIGHT SET CALCULATOR
+def weightSet(images_path, eigenfaces):
+    vectorface = batch_extractor(images_path)
+    average = mean(vectorface)
+    selisih = A(vectorface, average)
+    M = len(vectorface[0])
+    weight = [0 for i in range (M)]
+    for i in range (M):
+        weight[i] = np.matmul(np.transpose(eigenfaces), selisih[i] )
+
+    return weight
+
+    
+# THRESHOLD
+
+def threshold(eigenfaceWeight):
+    M = len(eigenfaceWeight)
+    for i in range(M):
+        j = i+1
+        for j in range(M):
+            if (i == 0 and j == 1):
+                max = np.linalg.norm(np.subtract(eigenfaceWeight[j], eigenfaceWeight[i])) 
+            else :
+                distance = np.linalg.norm(np.subtract(eigenfaceWeight[j], eigenfaceWeight[i]))
+                if(max < distance):
+                    max = distance
+
+    t = 0.5*max
+    return t
+
+# MATCHER
+
+def matcher(input, mean, trainingWeight, threshold, eigenfaces, match, index):
+    #perlu transpose input dan training set dulu
+    selisih = A(extract_features(input), mean)
+    weight = np.matmul(np.transpose(eigenfaces), selisih)
+
+    M = len(trainingWeight)
+    for i in range(M):
+        if (i == 0):
+            min = np.linalg.norm(np.subtract(input, trainingWeight[i])) 
+        else :
+            distance = np.linalg.norm(np.subtract(input, trainingWeight[i]))
+            if(distance < min):
+                min = distance
+                index = i
+
+    if (distance>threshold):
+        match = False
+    else :
+        match = True
+
+
 
 # QR DECOMPOSITION
 
@@ -176,6 +244,8 @@ def getEigenDiagonal(matrix):
     for i in range(n):
         eigenVal[i] = x[i][i]
         eigenVal[i] = round(eigenVal[i], 3)
+
+    eigenVal=sorted(eigenVal.tolist(), reverse=True)
     return eigenVal
 
 
@@ -189,8 +259,10 @@ def getEigenSpace(matrix):
     # eigenVal = [3,2]
 
     eigenVal = getEigenDiagonal(matrix)
+    print(eigenVal)
     n = len(matrix)
     identity = np.identity(n)
+    repeat = 0              # a variable for containing the iteration of repeating eigen value
     for i in range(n):
         lamda = eigenVal[i]
 
@@ -209,16 +281,19 @@ def getEigenSpace(matrix):
             e = v
             if (len(v) > n):
                 e = v[:n]
+                repeat+=1
         else:
             if (len(v) > n):
-                v = v[i*n:(i+1)*n]
+                v = v[repeat*n:(repeat+1)*n]
                 # e = np.concatenate((e,v), axis = 1)
                 # e = np.hstack(e,v)
                 e = np.c_[e, v]
+                repeat+=1
             else:
                 # e = np.concatenate((e,v), axis = 1)
                 # e = np.hstack(e,v)
                 e = np.c_[e, v]
+                repeat = 0
 
     return e
 
@@ -227,17 +302,20 @@ def getEigenSpace(matrix):
 # x = np.array([[1, -2], [1, 4]])
 # print(getEigenDiagonal(x))
 # print(getEigenDiagonal(x))
+# x = np.array([[0.5,0.25,0.25],[0.25,0.5,0.25],[0.25,0.25,0.5]])
+# x = np.array([[4,0,1],[-2,1,0],[-2,0,1]])
+# print(getEigenDiagonal(x))
 
 
 '''
 # TEST CASES FOR getEigenSpace
-e = getEigenVectors([[3,0],[8,-1]])
-# e = getEigenVectors([[1,3],[3,1]])
-# e = getEigenVectors([[3,-2,0],[-2,3,0],[0,0,5]])
-# e = getEigenVectors([[1,-2],[1,4]])
-# e = getEigenVectors([[0.5,0.25,0.25],[0.25,0.5,0.25],[0.25,0.25,0.5]])
-# e = getEigenVectors([[4,0,1],[-2,1,0],[-2,0,1]])
-# e = getEigenVectors([[1,-2],[1,4]])
-
+# x = np.array([[3,0],[8,-1]])
+# x = np.array([[1,3],[3,1]])
+# x = np.array([[3,-2,0],[-2,3,0],[0,0,5]])
+# x = np.array([[1,-2],[1,4]])
+# x = np.array([[0.5,0.25,0.25],[0.25,0.5,0.25],[0.25,0.25,0.5]])
+# x = np.array([[4,0,1],[-2,1,0],[-2,0,1]])
+# x = np.array([[1,-2],[1,4]])
+# e = getEigenSpace(x)
 # print(e)
 '''

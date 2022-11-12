@@ -13,7 +13,7 @@ while (True):
     for (x,y,w,h) in faces:
         roi_gray = gray[y:y+h, x:x+w]
         roi_color = frame[y:y+h, x:x+w]
-        img_item = "../test/camInput/imageCam.png"
+        img_item = "./test/camInput/imageCam.png"
         cv2.imwrite(img_item, roi_gray)
 
         color = (255,0,0) # BGR 

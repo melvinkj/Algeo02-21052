@@ -2,6 +2,7 @@ import cv2 as cv
 import numpy as np
 import sympy as sp
 from sympy import Matrix
+from sklearn.preprocessing import normalize
 import scipy
 from matplotlib.pyplot import imread
 import pickle as pickle
@@ -89,7 +90,7 @@ def A(extraction_result, mean):
 
 
 def kovarian(A):
-    kovarian = np.matmul(np.transpose(A),A)
+    kovarian = np.matmul(A, np.transpose(A))
     n = len(kovarian)
     for i in range(n):
         for j in range(n):
@@ -98,35 +99,25 @@ def kovarian(A):
 
 # EIGENFACE ALGORITHM
 
-def eigenfaces(images_path):
-    vectorface = batch_extractor(images_path)
-    average = mean(vectorface)
-    selisih = A(vectorface, average)
-    cov = kovarian(selisih)
-    eigenSpace = getEigenSpace(cov)
-    oriEigenSpace = np.matmul(selisih, eigenSpace)
-    k = 10
-    best = oriEigenSpace[0:, 0:k]
+def getEigenFaces(eigenSpace, A, k):
+    best = eigenSpace[0:k,0:]
+    bestOriEigenFace = np.matmul(A, best)
 
-    return best
+    return bestOriEigenFace
 
 # WEIGHT SET CALCULATOR
-def weightSet(images_path, eigenfaces):
-    vectorface = batch_extractor(images_path)
-    average = mean(vectorface)
-    selisih = A(vectorface, average)
-    M = len(vectorface[0])
-    weight = [0 for i in range (M)]
+def getWeightSet(A, eigenFaces, M, k):
+    weightSet = [[0] for i in range (M)]
     for i in range (M):
-        weight[i] = np.matmul(np.transpose(eigenfaces), selisih[i] )
+        for j in range(k):
+            weightSet[i][j] = np.matmul(np.transpose(eigenFaces[j]), A[i])
 
-    return weight
+    return weightSet
 
     
 # THRESHOLD
 
-def threshold(eigenfaceWeight):
-    M = len(eigenfaceWeight)
+def getThreshold(eigenfaceWeight, M):
     for i in range(M):
         j = i+1
         for j in range(M):
@@ -142,22 +133,23 @@ def threshold(eigenfaceWeight):
 
 # MATCHER
 
-def matcher(input, mean, trainingWeight, threshold, eigenfaces, match, index):
+def matcher(input, mean, weightSet, M, threshold, eigenfaces, match, index):
     #perlu transpose input dan training set dulu
     selisih = A(extract_features(input), mean)
-    weight = np.matmul(np.transpose(eigenfaces), selisih)
+    weight = [0 for i in range(M)]
+    for i in range (M):
+        weight[i] = np.matmul(np.transpose(eigenfaces[i]), selisih[0])
 
-    M = len(trainingWeight)
     for i in range(M):
         if (i == 0):
-            min = np.linalg.norm(np.subtract(input, trainingWeight[i])) 
+            min = np.linalg.norm(np.subtract(weight, weightSet[i])) 
         else :
-            distance = np.linalg.norm(np.subtract(input, trainingWeight[i]))
+            distance = np.linalg.norm(np.subtract(weight, weightSet[i]))
             if(distance < min):
                 min = distance
                 index = i
 
-    if (distance>threshold):
+    if (min>threshold):
         match = False
     else :
         match = True
@@ -256,10 +248,8 @@ def getEigenSpace(matrix):
     # eigenVal = [3, 2]
     # eigenVal = [1,1,1]
     # eigenVal = [3,2,1]
-    # eigenVal = [3,2]
 
     eigenVal = getEigenDiagonal(matrix)
-    print(eigenVal)
     n = len(matrix)
     identity = np.identity(n)
     repeat = 0              # a variable for containing the iteration of repeating eigen value
@@ -274,25 +264,27 @@ def getEigenSpace(matrix):
 
         # Getting Nullspace of m to Solve Parametric Equation
         v = m.nullspace()
-        v = Matrix(v)
+        v = np.transpose(Matrix(v))
 
         # Inserting Eigen Vector to Eigen Space
         if (i == 0):
             e = v
-            if (len(v) > n):
-                e = v[:n]
+            if (len(v[0]) > n):
+                e = [v[0][:n]]
                 repeat+=1
         else:
-            if (len(v) > n):
-                v = v[repeat*n:(repeat+1)*n]
+            if (len(v[0]) > n):
+                v = [v[0][repeat*n:(repeat+1)*n]]
                 # e = np.concatenate((e,v), axis = 1)
                 # e = np.hstack(e,v)
-                e = np.c_[e, v]
+                # e = np.c_[e, v]
+                e = np.concatenate((e, v), axis=0)
                 repeat+=1
             else:
                 # e = np.concatenate((e,v), axis = 1)
                 # e = np.hstack(e,v)
-                e = np.c_[e, v]
+                # e = np.c_[e, v]
+                e = np.concatenate((e, v), axis=0)
                 repeat = 0
 
     return e
@@ -315,7 +307,6 @@ def getEigenSpace(matrix):
 # x = np.array([[1,-2],[1,4]])
 # x = np.array([[0.5,0.25,0.25],[0.25,0.5,0.25],[0.25,0.25,0.5]])
 # x = np.array([[4,0,1],[-2,1,0],[-2,0,1]])
-# x = np.array([[1,-2],[1,4]])
 # e = getEigenSpace(x)
 # print(e)
 '''

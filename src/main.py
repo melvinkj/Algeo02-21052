@@ -179,4 +179,3 @@ def MainPage():
 
 WelcomePage()
 MainPage()
-show_frame()

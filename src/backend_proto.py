@@ -87,12 +87,80 @@ def A(extraction_result, mean):
 
 
 def kovarian(A):
-    kovarian = np.matmul(A, np.transpose(A))
+    kovarian = np.matmul(np.transpose(A),A)
     n = len(kovarian)
     for i in range(n):
         for j in range(n):
             kovarian[i][j] = round(kovarian[i][j], 3)
     return kovarian
+
+# EIGENFACE ALGORITHM
+
+def eigenfaces(images_path):
+    vectorface = batch_extractor(images_path)
+    average = mean(vectorface)
+    selisih = A(vectorface, average)
+    cov = kovarian(selisih)
+    eigenSpace = getEigenSpace(cov)
+    oriEigenSpace = np.matmul(selisih, eigenSpace)
+    k = 10
+    best = oriEigenSpace[0:, 0:k]
+
+    return best
+
+# WEIGHT SET CALCULATOR
+def weightSet(images_path, eigenfaces):
+    vectorface = batch_extractor(images_path)
+    average = mean(vectorface)
+    selisih = A(vectorface, average)
+    M = len(vectorface[0])
+    weight = [0 for i in range (M)]
+    for i in range (M):
+        weight[i] = np.matmul(np.transpose(eigenfaces), selisih[i] )
+
+    return weight
+
+    
+# THRESHOLD
+
+def threshold(eigenfaceWeight):
+    M = len(eigenfaceWeight)
+    for i in range(M):
+        j = i+1
+        for j in range(M):
+            if (i == 0 and j == 1):
+                max = np.linalg.norm(np.subtract(eigenfaceWeight[j], eigenfaceWeight[i])) 
+            else :
+                distance = np.linalg.norm(np.subtract(eigenfaceWeight[j], eigenfaceWeight[i]))
+                if(max < distance):
+                    max = distance
+
+    t = 0.5*max
+    return t
+
+# MATCHER
+
+def matcher(input, mean, trainingWeight, threshold, eigenfaces, match, index):
+    #perlu transpose input dan training set dulu
+    selisih = A(extract_features(input), mean)
+    weight = np.matmul(np.transpose(eigenfaces), selisih)
+
+    M = len(trainingWeight)
+    for i in range(M):
+        if (i == 0):
+            min = np.linalg.norm(np.subtract(input, trainingWeight[i])) 
+        else :
+            distance = np.linalg.norm(np.subtract(input, trainingWeight[i]))
+            if(distance < min):
+                min = distance
+                index = i
+
+    if (distance>threshold):
+        match = False
+    else :
+        match = True
+
+
 
 # QR DECOMPOSITION
 

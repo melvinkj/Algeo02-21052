@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 import csv
 
 # Feature extractor
+
+
 def extract_features(image_path, vector_size=32):
     image = imread(image_path)
     try:
@@ -97,22 +99,25 @@ def kovarian(A):
 
 # EIGENFACE ALGORITHM
 
+
 def getEigenFaces(eigenSpace, A, k):
-    best = eigenSpace[0:k,0:]
+    best = eigenSpace[0:k, 0:]
     bestOriEigenFace = np.matmul(A, best)
 
     return bestOriEigenFace
 
 # WEIGHT SET CALCULATOR
+
+
 def getWeightSet(A, eigenFaces, M, k):
-    weightSet = [[0] for i in range (M)]
-    for i in range (M):
+    weightSet = [[0] for i in range(M)]
+    for i in range(M):
         for j in range(k):
             weightSet[i][j] = np.matmul(np.transpose(eigenFaces[j]), A[i])
 
     return weightSet
 
-    
+
 # THRESHOLD
 
 def getThreshold(eigenfaceWeight, M):
@@ -120,10 +125,12 @@ def getThreshold(eigenfaceWeight, M):
         j = i+1
         for j in range(M):
             if (i == 0 and j == 1):
-                max = np.linalg.norm(np.subtract(eigenfaceWeight[j], eigenfaceWeight[i])) 
-            else :
-                distance = np.linalg.norm(np.subtract(eigenfaceWeight[j], eigenfaceWeight[i]))
-                if(max < distance):
+                max = np.linalg.norm(np.subtract(
+                    eigenfaceWeight[j], eigenfaceWeight[i]))
+            else:
+                distance = np.linalg.norm(np.subtract(
+                    eigenfaceWeight[j], eigenfaceWeight[i]))
+                if (max < distance):
                     max = distance
 
     t = 0.5*max
@@ -131,27 +138,27 @@ def getThreshold(eigenfaceWeight, M):
 
 # MATCHER
 
+
 def matcher(input, mean, weightSet, M, threshold, eigenfaces, match, index):
-    #perlu transpose input dan training set dulu
+    # perlu transpose input dan training set dulu
     selisih = A(extract_features(input), mean)
     weight = [0 for i in range(M)]
-    for i in range (M):
+    for i in range(M):
         weight[i] = np.matmul(np.transpose(eigenfaces[i]), selisih[0])
 
     for i in range(M):
         if (i == 0):
-            min = np.linalg.norm(np.subtract(weight, weightSet[i])) 
-        else :
+            min = np.linalg.norm(np.subtract(weight, weightSet[i]))
+        else:
             distance = np.linalg.norm(np.subtract(weight, weightSet[i]))
-            if(distance < min):
+            if (distance < min):
                 min = distance
                 index = i
 
-    if (min>threshold):
+    if (min > threshold):
         match = False
-    else :
+    else:
         match = True
-
 
 
 # QR DECOMPOSITION
@@ -208,84 +215,95 @@ def qrGetR(q, matrix):
     return result
 
 
-def cekTriangle(matrix):
-    triangle = 1
-    n = len(matrix)
-    for i in range(1, n):
-        for j in range(0, i):
-            if (matrix[i][j] > 0.0001 or matrix[i][j] < -0.0001):
-                triangle = 0
-    return triangle
+# def cekTriangle(matrix):
+#     triangle = 1
+#     n = len(matrix)
+#     for i in range(1, n):
+#         for j in range(0, i):
+#             if (matrix[i][j] > 0.0001 or matrix[i][j] < -0.0001):
+#                 triangle = 0
+#     return triangle
+
+def find_eig(matrix):
+    n, m = matrix.shape
+    Qdot = np.eye(n)
+    Q = qrGetQ(matrix)
+    R = qrGetR(Q, matrix)
+    for i in range(100):
+        Z = R.dot(Q)
+        Qdot = Qdot.dot(Q)
+        Q = qrGetQ(Z)
+        R = qrGetR(Q, Z)
+    return np.diag(Z), Qdot
+
+# def getEigenDiagonal(matrix):
+#     triangle = 0
+#     while (triangle == 0):
+#         q = qrGetQ(matrix)
+#         r = qrGetR(q, matrix)
+#         x = np.matmul(r, q)
+#         n = len(matrix)
+#         triangle = cekTriangle(x)
+#         if (triangle == 0):
+#             matrix = x
+#     eigenVal = [0 for i in range(n)]
+#     eigenVal = np.array(eigenVal)
+#     eigenVal = eigenVal.astype('float')
+#     for i in range(n):
+#         eigenVal[i] = x[i][i]
+#         eigenVal[i] = round(eigenVal[i], 3)
+
+#     eigenVal=sorted(eigenVal.tolist(), reverse=True)
+#     return eigenVal
 
 
-def getEigenDiagonal(matrix):
-    triangle = 0
-    while (triangle == 0):
-        q = qrGetQ(matrix)
-        r = qrGetR(q, matrix)
-        x = np.matmul(r, q)
-        n = len(matrix)
-        triangle = cekTriangle(x)
-        if (triangle == 0):
-            matrix = x
-    eigenVal = [0 for i in range(n)]
-    eigenVal = np.array(eigenVal)
-    eigenVal = eigenVal.astype('float')
-    for i in range(n):
-        eigenVal[i] = x[i][i]
-        eigenVal[i] = round(eigenVal[i], 3)
+# def getEigenSpace(matrix):
+#     # eigenVal = [3, -1]
+#     # eigenVal = [4,-2]
+#     # eigenVal = [5,5,1]
+#     # eigenVal = [3, 2]
+#     # eigenVal = [1,1,1]
+#     # eigenVal = [3,2,1]
 
-    eigenVal=sorted(eigenVal.tolist(), reverse=True)
-    return eigenVal
+#     eigenVal = getEigenDiagonal(matrix)
+#     n = len(matrix)
+#     identity = np.identity(n)
+#     repeat = 0              # a variable for containing the iteration of repeating eigen value
+#     for i in range(n):
+#         lamda = eigenVal[i]
 
+#         # Generating lamda.I Matrix
+#         lamdaI = lamda * identity
+#         # Generating lamda.I - A Matrix
+#         m = np.subtract(lamdaI, matrix)
+#         m = Matrix(m)
 
-def getEigenSpace(matrix):
-    # eigenVal = [3, -1]
-    # eigenVal = [4,-2]
-    # eigenVal = [5,5,1]
-    # eigenVal = [3, 2]
-    # eigenVal = [1,1,1]
-    # eigenVal = [3,2,1]
+#         # Getting Nullspace of m to Solve Parametric Equation
+#         v = m.nullspace()
+#         v = np.transpose(Matrix(v))
 
-    eigenVal = getEigenDiagonal(matrix)
-    n = len(matrix)
-    identity = np.identity(n)
-    repeat = 0              # a variable for containing the iteration of repeating eigen value
-    for i in range(n):
-        lamda = eigenVal[i]
+#         # Inserting Eigen Vector to Eigen Space
+#         if (i == 0):
+#             e = v
+#             if (len(v[0]) > n):
+#                 e = [v[0][:n]]
+#                 repeat+=1
+#         else:
+#             if (len(v[0]) > n):
+#                 v = [v[0][repeat*n:(repeat+1)*n]]
+#                 # e = np.concatenate((e,v), axis = 1)
+#                 # e = np.hstack(e,v)
+#                 # e = np.c_[e, v]
+#                 e = np.concatenate((e, v), axis=0)
+#                 repeat+=1
+#             else:
+#                 # e = np.concatenate((e,v), axis = 1)
+#                 # e = np.hstack(e,v)
+#                 # e = np.c_[e, v]
+#                 e = np.concatenate((e, v), axis=0)
+#                 repeat = 0
 
-        # Generating lamda.I Matrix
-        lamdaI = lamda * identity
-        # Generating lamda.I - A Matrix
-        m = np.subtract(lamdaI, matrix)
-        m = Matrix(m)
-
-        # Getting Nullspace of m to Solve Parametric Equation
-        v = m.nullspace()
-        v = np.transpose(Matrix(v))
-
-        # Inserting Eigen Vector to Eigen Space
-        if (i == 0):
-            e = v
-            if (len(v[0]) > n):
-                e = [v[0][:n]]
-                repeat+=1
-        else:
-            if (len(v[0]) > n):
-                v = [v[0][repeat*n:(repeat+1)*n]]
-                # e = np.concatenate((e,v), axis = 1)
-                # e = np.hstack(e,v)
-                # e = np.c_[e, v]
-                e = np.concatenate((e, v), axis=0)
-                repeat+=1
-            else:
-                # e = np.concatenate((e,v), axis = 1)
-                # e = np.hstack(e,v)
-                # e = np.c_[e, v]
-                e = np.concatenate((e, v), axis=0)
-                repeat = 0
-
-    return e
+#     return e
 
 
 # TEST

@@ -137,19 +137,19 @@ def MainPage():
         average = mean(extraction_result)
         a = A(extraction_result, average)
         cov = kovarian(a)
-        eigenSpace = getEigenSpace(cov)
+        eigenValue, eigenSpace = find_eig(cov)
         k = 10
         eigenFaces = getEigenFaces(eigenSpace, a, k)
-        weightSet = getWeightSet(a, eigenFaces, M, k )
+        weightSet = getWeightSet(a, eigenFaces, M, k)
         threshold = getThreshold(weightSet, M)
         match = True
         index = 0
-        matcher(userImageName, average, weightSet, M, threshold, eigenFaces, match, index)
-        if(match == True):
+        matcher(userImageName, average, weightSet, M,
+                threshold, eigenFaces, match, index)
+        if (match == True):
             print("Wajah yang paling cocok adalah wajah dengan index ke-" + index)
-        else :
+        else:
             print("Tidak ada wajah yang cocok.")
-
 
         # print(extraction_result)
         # print(userImageName)

@@ -2,12 +2,14 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter.ttk import Button
 from tkinter import *
+from sklearn.preprocessing import normalize
 from submain import *
 from backend_proto import *
 # from cam import *
 import os
 from numpy.linalg import eig
 from tkinter import filedialog
+
 
 def WelcomePage():
 
@@ -139,7 +141,7 @@ def MainPage():
         a = A(extraction_result, average)
         cov = kovarian(a)
         eigenValue, eigenSpace = sorted_eig(cov)
-        eiglib,eigvlib = eig(cov)
+        # eiglib, eigvlib = eig(cov)
         # print("hitung: ")
         # print(eigenValue)
         # print(eigenSpace)
@@ -153,11 +155,19 @@ def MainPage():
         threshold = getThreshold(weightSet, M)
         match = True
         index = 0
-        match , index = matcher(userImageName, average, weightSet, M,
-                threshold, eigenFaces)
+        match, matchedPath = matcher(userImageName, dataSetName, average, weightSet, M,
+                                     threshold, eigenFaces)
         # print(np.array(weightSet).shape)
         if (match == True):
-            print("Wajah yang paling cocok adalah wajah dengan index ke-" + str(index))
+            print("Wajah yang paling cocok adalah wajah dengan file path", matchedPath)
+            # labelImg2.config(image=matchedPath)
+            global displayImg2
+            displayImg2 = Image.open(matchedPath)
+            displayImg2 = displayImg2.resize((275, 275))
+            displayImg2 = ImageTk.PhotoImage(displayImg2)
+            labelImg2.config(image=displayImg2)
+            resultLabel.config(text=matchedPath.split('/')[-1])
+            # userImageInfo.config(text=userImageName.split('/')[-1])
         else:
             print("Tidak ada wajah yang cocok.")
 
@@ -175,8 +185,9 @@ def MainPage():
     resultContainer = Frame(leftContainer, background=bgColor)
     Label(resultContainer, text="Result : ", font=(
         'Times', 23), background=bgColor).pack(pady=(15, 0))
-    Label(resultContainer, text=result, font=(
-        'Times', 16), background=bgColor).pack()
+    resultLabel = Label(resultContainer, text=result, font=(
+        'Times', 16), background=bgColor)
+    resultLabel.pack()
 
     resultContainer.grid(row=3, column=0, pady=2)
 
@@ -245,6 +256,7 @@ def MainPage():
     window.mainloop()
 
 # Main
+
 
 WelcomePage()
 MainPage()

@@ -117,7 +117,7 @@ def getWeightSet(A, eigenFaces, M, k):
     weightSet = [[0] for i in range(M)]
     for i in range(M):
         for j in range(k):
-            weightSet[i] = np.matmul(A[i],np.transpose(eigenFaces))
+            weightSet[i] = np.matmul(A[i], np.transpose(eigenFaces))
 
     return weightSet
 
@@ -143,7 +143,9 @@ def getThreshold(eigenfaceWeight, M):
 # MATCHER
 
 
-def matcher(input, mean, weightSet, M, threshold, eigenfaces):
+def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
+    folder = [os.path.join(datasetName, p)
+              for p in sorted(os.listdir(datasetName))]
     # perlu transpose input dan training set dulu
     # print(np.array(mean).shape)
     # print(mean)
@@ -158,9 +160,13 @@ def matcher(input, mean, weightSet, M, threshold, eigenfaces):
     for i in range(M):
         if (i == 0):
             min = np.linalg.norm(np.subtract(weight, weightSet[i]))
+            # print("distance ", i, ": ")
+            # print(min)
             index = i
         else:
             distance = np.linalg.norm(np.subtract(weight, weightSet[i]))
+            # print("distance ", i, ":")
+            # print(distance)
             if (distance < min):
                 min = distance
                 index = i
@@ -169,8 +175,9 @@ def matcher(input, mean, weightSet, M, threshold, eigenfaces):
         match = False
     else:
         match = True
-    
-    return match, index
+        matchedPath = folder[index]
+
+    return match, matchedPath
 
 
 # QR DECOMPOSITION
@@ -260,6 +267,7 @@ def find_eig(matrix):
         # R = qrGetR(Q, Z)
         Q, R = np.linalg.qr(Z)
     return np.diag(Z), Qdot
+
 
 def sorted_eig(matrix):
     eigVal, eigVec = find_eig(matrix)
@@ -354,7 +362,6 @@ def sorted_eig(matrix):
 # print(getEigenDiagonal(x))
 
 
-
 # TEST CASES FOR getEigenSpace
 # x = np.array([[3,0],[8,-1]])
 # x = np.array([[1,3],[3,1]])
@@ -365,4 +372,3 @@ def sorted_eig(matrix):
 # e,v = find_eig(x)
 # print(e)
 # print(v)
-

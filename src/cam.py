@@ -5,6 +5,7 @@ from tkinter import *
 from submain import *
 import os
 from PIL import Image, ImageTk
+import time
 
 
 def CamPage():
@@ -18,6 +19,7 @@ def CamPage():
     dirname = os.path.dirname(__file__)
     pathname = dirname.replace("src", "")
 
+    startTime = time.time()
     while(True):
         global camImage, imagePath1, imagePath2
         # Capture per frame
@@ -39,7 +41,11 @@ def CamPage():
             end_cord_y = y + h
             cv2.rectangle(frame,(x,y), (end_cord_x, end_cord_y), color, stroke)
 
+        
+        endTime = time.time()
 
+        if (endTime - startTime >= 5):
+            break
         # Display the resulting frame
         cv2.imshow('', frame)
         if cv2.waitKey(20) & 0xFF == ord('q'):

@@ -2,10 +2,12 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter.ttk import Button
 from tkinter import *
+from tkinter import filedialog
 from submain import *
 from backend_proto import *
-# from cam import *
+from cam import *
 import os
+import time
 
 
 def WelcomePage():
@@ -41,7 +43,7 @@ def WelcomePage():
     subtitle.grid(row=1, column=0, pady=(0, 50))
 
     mainPageBtn = Button(rightContainer, text="Go To Main Page", font=(
-        "Times", 20), background=bgColor, command=window.destroy)
+        "Times", 20), background=bgColor, command= window.destroy)
     mainPageBtn.grid(row=2, column=0)
 
     rightContainer.pack(pady=(100, 0))
@@ -52,6 +54,7 @@ def WelcomePage():
 def MainPage():
     # Set default image
     dirname = os.path.dirname(__file__)
+    print(dirname)
     imagePath1 = os.path.join(dirname, 'assets\profile_icon.png')
     imagePath2 = os.path.join(dirname, 'assets\profile_icon.png')
 
@@ -95,9 +98,9 @@ def MainPage():
     dataSetBtn.bind("<Enter>", on_enter)
     dataSetBtn.bind("<Leave>", on_leave)
     dataSetBtn.pack(side="left", pady=10)
-    datasetInfo = Label(dataSetContainer,
+    datasetInfo = Label(dataSetContainer,background= bgColor,
                         text=dataSetName, font=("Times", 12))
-    datasetInfo.pack()
+    datasetInfo.pack(side=tk.RIGHT, padx=(10,0))
 
     dataSetContainer.grid(row=0, column=0, pady=2, padx=20, sticky="e")
 
@@ -122,14 +125,31 @@ def MainPage():
     userImageBtn.bind("<Enter>", on_enter)
     userImageBtn.bind("<Leave>", on_leave)
     userImageBtn.pack(side="left", pady=10)
-    userImageInfo = Label(userImageContainer,
+    userImageInfo = Label(userImageContainer, background= bgColor,
                           text=userImageName, font=("Times", 12))
-    userImageInfo.pack()
+    userImageInfo.pack(side=tk.RIGHT, padx=(10,0))
 
     userImageContainer.grid(row=1, column=0, pady=2)
+    
+
+    # Camera button
+    def inputImageByCam():
+        CamPage()
+        global displayImg1
+        pathname = dirname.replace("src", "")
+        imagePath1 = os.path.join(pathname, 'test\camInput\imageCam.png')
+        displayImg1 = readImage(imagePath1)
+        labelImg1.config(image=displayImg1)
+    camBtn = Button(leftContainer, text="Input by Camera", font=("Times", 16), 
+                    background="#d4caa3", width=15, command= inputImageByCam)
+    camBtn.bind("<Enter>", on_cam_enter)
+    camBtn.bind("<Leave>", on_cam_leave)
+    
+    camBtn.grid(row=2, column=0, pady=10)
 
     # Start Button
     def faceRecognition():
+        starttime = time.time()
         global userImageName
         global dataSetName
         extraction_result = batch_extractor(dataSetName)
@@ -146,6 +166,7 @@ def MainPage():
         index = 0
         matcher(userImageName, average, weightSet, M,
                 threshold, eigenFaces, match, index)
+        endtime = time.time()
         if (match == True):
             print("Wajah yang paling cocok adalah wajah dengan index ke-" + index)
         else:
@@ -159,7 +180,7 @@ def MainPage():
     startBtn.bind("<Enter>", on_start_enter)
     startBtn.bind("<Leave>", on_start_leave)
 
-    startBtn.grid(row=2, column=0, pady=10)
+    startBtn.grid(row=3, column=0, pady=10)
 
     # Result Container
     resultContainer = Frame(leftContainer, background=bgColor)
@@ -168,7 +189,7 @@ def MainPage():
     Label(resultContainer, text=result, font=(
         'Times', 16), background=bgColor).pack()
 
-    resultContainer.grid(row=3, column=0, pady=2)
+    resultContainer.grid(row=4, column=0, pady=2)
 
     leftContainer.pack(padx=60, side=tk.LEFT)
 
@@ -237,5 +258,6 @@ def MainPage():
 # Main
 
 
-WelcomePage()
+# WelcomePage()
 MainPage()
+# CamPage()

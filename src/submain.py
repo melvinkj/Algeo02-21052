@@ -28,3 +28,9 @@ def on_start_enter(e):
 
 def on_start_leave(e):
     e.widget['background'] = "#decdb9"
+
+def on_cam_enter(e):
+    e.widget['background'] = '#947562'
+
+def on_cam_leave(e):
+    e.widget['background'] = "#d4caa3"

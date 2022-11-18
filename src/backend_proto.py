@@ -101,10 +101,14 @@ def kovarian(A):
 
 
 def getEigenFaces(eigenSpace, A, k):
-    best = eigenSpace[0:k, 0:]
-    bestOriEigenFace = np.matmul(A, best)
+    best = eigenSpace[0:k]
+    # print(np.array(best).shape)
+    # print(np.array(A).shape)
+    bestOriEigenFace = np.matmul(best, A)
 
     return bestOriEigenFace
+
+# def getWeight(eigenFace, )
 
 # WEIGHT SET CALCULATOR
 
@@ -113,7 +117,7 @@ def getWeightSet(A, eigenFaces, M, k):
     weightSet = [[0] for i in range(M)]
     for i in range(M):
         for j in range(k):
-            weightSet[i][j] = np.matmul(np.transpose(eigenFaces[j]), A[i])
+            weightSet[i] = np.matmul(A[i], np.transpose(eigenFaces))
 
     return weightSet
 
@@ -122,8 +126,8 @@ def getWeightSet(A, eigenFaces, M, k):
 
 def getThreshold(eigenfaceWeight, M):
     for i in range(M):
-        j = i+1
-        for j in range(M):
+        start = i+1
+        for j in range(start, M):
             if (i == 0 and j == 1):
                 max = np.linalg.norm(np.subtract(
                     eigenfaceWeight[j], eigenfaceWeight[i]))
@@ -139,18 +143,30 @@ def getThreshold(eigenfaceWeight, M):
 # MATCHER
 
 
-def matcher(input, mean, weightSet, M, threshold, eigenfaces, match, index):
+def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
+    folder = [os.path.join(datasetName, p)
+              for p in sorted(os.listdir(datasetName))]
     # perlu transpose input dan training set dulu
-    selisih = A(extract_features(input), mean)
+    # print(np.array(mean).shape)
+    # print(mean)
+    selisih = A([extract_features(input)], mean)
+    # print(np.array(selisih).shape)
     weight = [0 for i in range(M)]
-    for i in range(M):
-        weight[i] = np.matmul(np.transpose(eigenfaces[i]), selisih[0])
+
+    weight = np.matmul(selisih[0], np.transpose(eigenfaces))
+    # print(weight)
+    # print(np.array(weight).shape)
 
     for i in range(M):
         if (i == 0):
             min = np.linalg.norm(np.subtract(weight, weightSet[i]))
+            # print("distance ", i, ": ")
+            # print(min)
+            index = i
         else:
             distance = np.linalg.norm(np.subtract(weight, weightSet[i]))
+            # print("distance ", i, ":")
+            # print(distance)
             if (distance < min):
                 min = distance
                 index = i
@@ -159,6 +175,9 @@ def matcher(input, mean, weightSet, M, threshold, eigenfaces, match, index):
         match = False
     else:
         match = True
+        matchedPath = folder[index]
+
+    return match, matchedPath
 
 
 # QR DECOMPOSITION
@@ -182,37 +201,43 @@ def proj(u, v):
     return result
 
 
-def qrGetQ(matrix):
+def qr(matrix):
     n = len(matrix)
-    result = [[0 for i in range(n)] for j in range(n)]
-    result = np.reshape(result, (n, n))
-    result = result.astype('float')
+    resultQ = [[0 for i in range(n)] for j in range(n)]
+    resultQ = np.reshape(resultQ, (n, n))
+    resultQ = resultQ.astype('float')
     arrTemp = [0 for i in range(n)]
     for i in range(len(matrix)):
         arrTemp = np.array(matrix[:, i])
         arrTemp = np.reshape(arrTemp, n)
         for j in range(0, i):
-            u = np.array(result[:, j])
+            u = np.array(resultQ[:, j])
             u = np.reshape(u, n)
             arrTemp = np.subtract(arrTemp, proj(u, arrTemp))
         for k in range(n):
-            result[k][i] = arrTemp[k]
+            resultQ[k][i] = arrTemp[k]
     for x in range(n):
-        arrTemp = np.array(result[:, x])
+        arrTemp = np.array(resultQ[:, x])
         arrTemp = np.reshape(arrTemp, n)
         arrTemp = np.divide(arrTemp, norm(arrTemp))
         for y in range(n):
-            result[y][x] = arrTemp[y]
-    return result
+            resultQ[y][x] = arrTemp[y]
+    resultR = [[0 for i in range(n)] for j in range(n)]
+    resultR = np.reshape(resultR, (n, n))
+    resultR = resultR.astype('float')
+    transpose = np.transpose(resultQ)
+    resultR = np.matmul(transpose, matrix)
+
+    return resultQ, resultR
 
 
-def qrGetR(q, matrix):
-    n = len(matrix)
-    result = [[0 for i in range(n)] for j in range(n)]
-    result = np.reshape(result, (n, n))
-    transpose = np.transpose(q)
-    result = np.matmul(transpose, matrix)
-    return result
+# def qrGetR(q, matrix):
+#     n = len(matrix)
+#     result = [[0 for i in range(n)] for j in range(n)]
+#     result = np.reshape(result, (n, n))
+#     transpose = np.transpose(q)
+#     result = np.matmul(transpose, matrix)
+#     return result
 
 
 # def cekTriangle(matrix):
@@ -224,17 +249,43 @@ def qrGetR(q, matrix):
 #                 triangle = 0
 #     return triangle
 
+# def find_eig(matrix):
+#     n, m = matrix.shape
+#     Qdot = np.eye(n)
+#     Q = qrGetQ(matrix)
+#     R = qrGetR(Q, matrix)
+#     for i in range(100):
+#         Z = R.dot(Q)
+#         Qdot = Qdot.dot(Q)
+#         Q = qrGetQ(Z)
+#         R = qrGetR(Q, Z)
+#     return np.diag(Z), Qdot
 def find_eig(matrix):
     n, m = matrix.shape
     Qdot = np.eye(n)
-    Q = qrGetQ(matrix)
-    R = qrGetR(Q, matrix)
+    Q, R = qr(matrix)
+    # Q, R = np.linalg.qr(matrix)
     for i in range(100):
         Z = R.dot(Q)
         Qdot = Qdot.dot(Q)
-        Q = qrGetQ(Z)
-        R = qrGetR(Q, Z)
+        Q, R = qr(matrix)
+        # Q, R = np.linalg.qr(Z)
     return np.diag(Z), Qdot
+
+
+def sorted_eig(matrix):
+    eigVal, eigVec = find_eig(matrix)
+    eigVec = np.transpose(eigVec)
+
+    # Sorting from largest to smallest eigVal
+    sortedEigVal = np.sort(eigVal)[::-1]
+    sortedIdx = np.argsort(eigVal)[::-1]
+
+    sortedEigVec = [eigVec[i] for i in sortedIdx]
+
+    # sortedEigVec = np.transpose(sortedEigVec)
+
+    return sortedEigVal, sortedEigVec
 
 # def getEigenDiagonal(matrix):
 #     triangle = 0
@@ -315,7 +366,6 @@ def find_eig(matrix):
 # print(getEigenDiagonal(x))
 
 
-'''
 # TEST CASES FOR getEigenSpace
 # x = np.array([[3,0],[8,-1]])
 # x = np.array([[1,3],[3,1]])
@@ -323,6 +373,6 @@ def find_eig(matrix):
 # x = np.array([[1,-2],[1,4]])
 # x = np.array([[0.5,0.25,0.25],[0.25,0.5,0.25],[0.25,0.25,0.5]])
 # x = np.array([[4,0,1],[-2,1,0],[-2,0,1]])
-# e = getEigenSpace(x)
+# e,v = find_eig(x)
 # print(e)
-'''
+# print(v)

@@ -201,37 +201,43 @@ def proj(u, v):
     return result
 
 
-def qrGetQ(matrix):
+def qr(matrix):
     n = len(matrix)
-    result = [[0 for i in range(n)] for j in range(n)]
-    result = np.reshape(result, (n, n))
-    result = result.astype('float')
+    resultQ = [[0 for i in range(n)] for j in range(n)]
+    resultQ = np.reshape(resultQ, (n, n))
+    resultQ = resultQ.astype('float')
     arrTemp = [0 for i in range(n)]
     for i in range(len(matrix)):
         arrTemp = np.array(matrix[:, i])
         arrTemp = np.reshape(arrTemp, n)
         for j in range(0, i):
-            u = np.array(result[:, j])
+            u = np.array(resultQ[:, j])
             u = np.reshape(u, n)
             arrTemp = np.subtract(arrTemp, proj(u, arrTemp))
         for k in range(n):
-            result[k][i] = arrTemp[k]
+            resultQ[k][i] = arrTemp[k]
     for x in range(n):
-        arrTemp = np.array(result[:, x])
+        arrTemp = np.array(resultQ[:, x])
         arrTemp = np.reshape(arrTemp, n)
         arrTemp = np.divide(arrTemp, norm(arrTemp))
         for y in range(n):
-            result[y][x] = arrTemp[y]
-    return result
+            resultQ[y][x] = arrTemp[y]
+    resultR = [[0 for i in range(n)] for j in range(n)]
+    resultR = np.reshape(resultR, (n, n))
+    resultR = resultR.astype('float')
+    transpose = np.transpose(resultQ)
+    resultR = np.matmul(transpose, matrix)
+
+    return resultQ, resultR
 
 
-def qrGetR(q, matrix):
-    n = len(matrix)
-    result = [[0 for i in range(n)] for j in range(n)]
-    result = np.reshape(result, (n, n))
-    transpose = np.transpose(q)
-    result = np.matmul(transpose, matrix)
-    return result
+# def qrGetR(q, matrix):
+#     n = len(matrix)
+#     result = [[0 for i in range(n)] for j in range(n)]
+#     result = np.reshape(result, (n, n))
+#     transpose = np.transpose(q)
+#     result = np.matmul(transpose, matrix)
+#     return result
 
 
 # def cekTriangle(matrix):
@@ -257,15 +263,13 @@ def qrGetR(q, matrix):
 def find_eig(matrix):
     n, m = matrix.shape
     Qdot = np.eye(n)
-    # Q = qrGetQ(matrix)
-    # R = qrGetR(Q, matrix)
-    Q, R = np.linalg.qr(matrix)
+    Q, R = qr(matrix)
+    # Q, R = np.linalg.qr(matrix)
     for i in range(100):
         Z = R.dot(Q)
         Qdot = Qdot.dot(Q)
-        # Q = qrGetQ(Z)
-        # R = qrGetR(Q, Z)
-        Q, R = np.linalg.qr(Z)
+        Q, R = qr(matrix)
+        # Q, R = np.linalg.qr(Z)
     return np.diag(Z), Qdot
 
 

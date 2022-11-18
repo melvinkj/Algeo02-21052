@@ -6,7 +6,8 @@ from submain import *
 from backend_proto import *
 # from cam import *
 import os
-
+from numpy.linalg import eig
+from tkinter import filedialog
 
 def WelcomePage():
 
@@ -137,17 +138,26 @@ def MainPage():
         average = mean(extraction_result)
         a = A(extraction_result, average)
         cov = kovarian(a)
-        eigenValue, eigenSpace = find_eig(cov)
+        eigenValue, eigenSpace = sorted_eig(cov)
+        eiglib,eigvlib = eig(cov)
+        # print("hitung: ")
+        # print(eigenValue)
+        # print(eigenSpace)
+
+        # print("lib")
+        # print(eiglib)
+        # print(eigvlib)
         k = 10
         eigenFaces = getEigenFaces(eigenSpace, a, k)
         weightSet = getWeightSet(a, eigenFaces, M, k)
         threshold = getThreshold(weightSet, M)
         match = True
         index = 0
-        matcher(userImageName, average, weightSet, M,
-                threshold, eigenFaces, match, index)
+        match , index = matcher(userImageName, average, weightSet, M,
+                threshold, eigenFaces)
+        # print(np.array(weightSet).shape)
         if (match == True):
-            print("Wajah yang paling cocok adalah wajah dengan index ke-" + index)
+            print("Wajah yang paling cocok adalah wajah dengan index ke-" + str(index))
         else:
             print("Tidak ada wajah yang cocok.")
 
@@ -235,7 +245,6 @@ def MainPage():
     window.mainloop()
 
 # Main
-
 
 WelcomePage()
 MainPage()

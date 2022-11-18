@@ -101,10 +101,14 @@ def kovarian(A):
 
 
 def getEigenFaces(eigenSpace, A, k):
-    best = eigenSpace[0:k, 0:]
-    bestOriEigenFace = np.matmul(A, best)
+    best = eigenSpace[0:k]
+    # print(np.array(best).shape)
+    # print(np.array(A).shape)
+    bestOriEigenFace = np.matmul(best, A)
 
     return bestOriEigenFace
+
+# def getWeight(eigenFace, )
 
 # WEIGHT SET CALCULATOR
 
@@ -113,7 +117,7 @@ def getWeightSet(A, eigenFaces, M, k):
     weightSet = [[0] for i in range(M)]
     for i in range(M):
         for j in range(k):
-            weightSet[i][j] = np.matmul(np.transpose(eigenFaces[j]), A[i])
+            weightSet[i] = np.matmul(A[i],np.transpose(eigenFaces))
 
     return weightSet
 
@@ -122,8 +126,8 @@ def getWeightSet(A, eigenFaces, M, k):
 
 def getThreshold(eigenfaceWeight, M):
     for i in range(M):
-        j = i+1
-        for j in range(M):
+        start = i+1
+        for j in range(start, M):
             if (i == 0 and j == 1):
                 max = np.linalg.norm(np.subtract(
                     eigenfaceWeight[j], eigenfaceWeight[i]))
@@ -139,16 +143,22 @@ def getThreshold(eigenfaceWeight, M):
 # MATCHER
 
 
-def matcher(input, mean, weightSet, M, threshold, eigenfaces, match, index):
+def matcher(input, mean, weightSet, M, threshold, eigenfaces):
     # perlu transpose input dan training set dulu
-    selisih = A(extract_features(input), mean)
+    # print(np.array(mean).shape)
+    # print(mean)
+    selisih = A([extract_features(input)], mean)
+    # print(np.array(selisih).shape)
     weight = [0 for i in range(M)]
-    for i in range(M):
-        weight[i] = np.matmul(np.transpose(eigenfaces[i]), selisih[0])
+
+    weight = np.matmul(selisih[0], np.transpose(eigenfaces))
+    # print(weight)
+    # print(np.array(weight).shape)
 
     for i in range(M):
         if (i == 0):
             min = np.linalg.norm(np.subtract(weight, weightSet[i]))
+            index = i
         else:
             distance = np.linalg.norm(np.subtract(weight, weightSet[i]))
             if (distance < min):
@@ -159,6 +169,8 @@ def matcher(input, mean, weightSet, M, threshold, eigenfaces, match, index):
         match = False
     else:
         match = True
+    
+    return match, index
 
 
 # QR DECOMPOSITION
@@ -224,17 +236,44 @@ def qrGetR(q, matrix):
 #                 triangle = 0
 #     return triangle
 
+# def find_eig(matrix):
+#     n, m = matrix.shape
+#     Qdot = np.eye(n)
+#     Q = qrGetQ(matrix)
+#     R = qrGetR(Q, matrix)
+#     for i in range(100):
+#         Z = R.dot(Q)
+#         Qdot = Qdot.dot(Q)
+#         Q = qrGetQ(Z)
+#         R = qrGetR(Q, Z)
+#     return np.diag(Z), Qdot
 def find_eig(matrix):
     n, m = matrix.shape
     Qdot = np.eye(n)
-    Q = qrGetQ(matrix)
-    R = qrGetR(Q, matrix)
+    # Q = qrGetQ(matrix)
+    # R = qrGetR(Q, matrix)
+    Q, R = np.linalg.qr(matrix)
     for i in range(100):
         Z = R.dot(Q)
         Qdot = Qdot.dot(Q)
-        Q = qrGetQ(Z)
-        R = qrGetR(Q, Z)
+        # Q = qrGetQ(Z)
+        # R = qrGetR(Q, Z)
+        Q, R = np.linalg.qr(Z)
     return np.diag(Z), Qdot
+
+def sorted_eig(matrix):
+    eigVal, eigVec = find_eig(matrix)
+    eigVec = np.transpose(eigVec)
+
+    # Sorting from largest to smallest eigVal
+    sortedEigVal = np.sort(eigVal)[::-1]
+    sortedIdx = np.argsort(eigVal)[::-1]
+
+    sortedEigVec = [eigVec[i] for i in sortedIdx]
+
+    # sortedEigVec = np.transpose(sortedEigVec)
+
+    return sortedEigVal, sortedEigVec
 
 # def getEigenDiagonal(matrix):
 #     triangle = 0
@@ -315,7 +354,7 @@ def find_eig(matrix):
 # print(getEigenDiagonal(x))
 
 
-'''
+
 # TEST CASES FOR getEigenSpace
 # x = np.array([[3,0],[8,-1]])
 # x = np.array([[1,3],[3,1]])
@@ -323,6 +362,7 @@ def find_eig(matrix):
 # x = np.array([[1,-2],[1,4]])
 # x = np.array([[0.5,0.25,0.25],[0.25,0.5,0.25],[0.25,0.25,0.5]])
 # x = np.array([[4,0,1],[-2,1,0],[-2,0,1]])
-# e = getEigenSpace(x)
+# e,v = find_eig(x)
 # print(e)
-'''
+# print(v)
+

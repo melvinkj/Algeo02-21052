@@ -157,16 +157,32 @@ def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
     # print(np.array(weight).shape)
 
     for i in range(M):
+        # Normalisasi vektor
+        norm_i = np.linalg.norm(weightSet[i])
+        norm = np.linalg.norm(weight)
+        vecNorm_i = np.multiply(weightSet[i], 1/norm_i)
+        vecNorm = np.multiply(weight, 1/norm)
+
+        # Formula Euclidean Distance 
+        subResult = np.subtract(vecNorm_i, vecNorm)
+        normResult = np.linalg.norm(subResult)
+        distance = (normResult**2)/2
+
+        # Rumus cos(teta) = 1 - ||x-x'||^2 / 2 = cos (teta)
+        # nilai distance adalah ||x-x'|| ^2 /2 , boleh lebih dari 1. Namun bila lebih dari satu maka dikurangi 1 (mendekati cos 0)
+        if (distance > 1):
+            distance -=1
+
+        print("index", i+1, ": ", distance)
         if (i == 0):
-            leng = np.linalg.norm(weightSet[i]) - np.linalg.norm(weight)
-            min = np.dot(np.transpose(leng), leng)
+            min = distance
             # min = np.linalg.norm(np.subtract(weight, weightSet[i]))
             # print("distance ", i, ": ")
             # print(min)
             index = i
         else:
-            leng = np.linalg.norm(weightSet[i]) - np.linalg.norm(weight)
-            distance = np.dot(np.transpose(leng), leng)
+            # leng = np.linalg.norm(weightSet[i]) - np.linalg.norm(weight)
+            # distance = np.dot(np.transpose(leng), leng)
             # distance = np.linalg.norm(np.subtract(weight, weightSet[i]))
             # print("distance ", i, ":")
             # print(distance)
@@ -175,6 +191,7 @@ def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
                 index = i
 
     if (min > threshold):
+        # Kasus tidak ada yang mirip
         match = False
     else:
         match = True

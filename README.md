@@ -56,3 +56,7 @@ Tugas Besar 2 - IF2123 Aljabar Linier dan Geometri
 <li> Folder <i> doc </i>
 <p> Berisikan file laporan </p>
 </ul>
+ 
+<h2> <b> Meme section </b> </h2>
+<h4> Istirahat sejenak di masa tubes </h4>
+<img src="./src/assets/meme.jpg" alt="Face Recog Meme">

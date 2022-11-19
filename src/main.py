@@ -141,10 +141,14 @@ def MainPage():
     def inputImageByCam():
         CamPage()
         global displayImg1
+        global userImageName
         pathname = dirname.replace("src", "")
         imagePath1 = os.path.join(pathname, 'test\camInput\imageCam.png')
+        userImageName = imagePath1
         displayImg1 = readImage(imagePath1)
         labelImg1.config(image=displayImg1)
+
+
     camBtn = Button(leftContainer, text="Input by Camera", font=("Times", 16), 
                     background="#d4caa3", width=15, command= inputImageByCam)
     camBtn.bind("<Enter>", on_cam_enter)
@@ -158,6 +162,7 @@ def MainPage():
         global userImageName
         global dataSetName
         global executionTime
+        print("Used image :", userImageName)
         extraction_result = batch_extractor(dataSetName)
         M = len(extraction_result)
         average = mean(extraction_result)

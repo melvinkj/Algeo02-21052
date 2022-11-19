@@ -136,6 +136,7 @@ def getThreshold(eigenfaceWeight, M):
                     max = distance
 
     t = 0.5*max
+    print(t)
     return t
 
 # MATCHER

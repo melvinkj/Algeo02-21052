@@ -1,17 +1,15 @@
 import cv2 as cv
 import numpy as np
-import sympy as sp
-from sympy import Matrix
+# import sympy as sp
+# from sympy import Matrix
 from sklearn.preprocessing import normalize
 import scipy
 from matplotlib.pyplot import imread
 import pickle as pickle
-# from scipy import spatial
 import random
 import os
-import math
 import matplotlib.pyplot as plt
-import csv
+
 
 # Feature extractor
 
@@ -129,11 +127,11 @@ def getThreshold(eigenfaceWeight, M):
         start = i+1
         for j in range(start, M):
             if (i == 0 and j == 1):
-                max = np.linalg.norm(np.subtract(
-                    eigenfaceWeight[j], eigenfaceWeight[i]))
+                leng = np.linalg.norm(eigenfaceWeight[j]) - np.linalg.norm(eigenfaceWeight[i])
+                max = np.dot(np.transpose(leng), leng)
             else:
-                distance = np.linalg.norm(np.subtract(
-                    eigenfaceWeight[j], eigenfaceWeight[i]))
+                curr = np.linalg.norm(eigenfaceWeight[j]) - np.linalg.norm(eigenfaceWeight[i])
+                distance = np.dot(np.transpose(curr), curr)
                 if (max < distance):
                     max = distance
 
@@ -159,12 +157,16 @@ def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
 
     for i in range(M):
         if (i == 0):
-            min = np.linalg.norm(np.subtract(weight, weightSet[i]))
+            leng = np.linalg.norm(weightSet[i]) - np.linalg.norm(weight)
+            min = np.dot(np.transpose(leng), leng)
+            # min = np.linalg.norm(np.subtract(weight, weightSet[i]))
             # print("distance ", i, ": ")
             # print(min)
             index = i
         else:
-            distance = np.linalg.norm(np.subtract(weight, weightSet[i]))
+            leng = np.linalg.norm(weightSet[i]) - np.linalg.norm(weight)
+            distance = np.dot(np.transpose(leng), leng)
+            # distance = np.linalg.norm(np.subtract(weight, weightSet[i]))
             # print("distance ", i, ":")
             # print(distance)
             if (distance < min):
@@ -177,7 +179,8 @@ def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
         match = True
         matchedPath = folder[index]
 
-    return match, matchedPath
+
+    return match, matchedPath, min
 
 
 # QR DECOMPOSITION

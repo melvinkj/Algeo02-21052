@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter.ttk import Button
 from tkinter import *
-from sklearn.preprocessing import normalize
 from tkinter import filedialog
 from submain import *
 from backend_proto import *
@@ -170,17 +169,17 @@ def MainPage():
         # print("lib")
         # print(eiglib)
         # print(eigvlib)
-        k = 10
+        k = int(0.7*M)
         eigenFaces = getEigenFaces(eigenSpace, a, k)
         weightSet = getWeightSet(a, eigenFaces, M, k)
         threshold = getThreshold(weightSet, M)
         match = True
         index = 0
 
-        match, matchedPath = matcher(userImageName, dataSetName, average, weightSet, M,
+        match, matchedPath, distance = matcher(userImageName, dataSetName, average, weightSet, M,
                                      threshold, eigenFaces)
   
-
+        print(distance)
         endtime = time.time()
 
         if (match == True):
@@ -192,6 +191,7 @@ def MainPage():
             displayImg2 = ImageTk.PhotoImage(displayImg2)
             labelImg2.config(image=displayImg2)
             resultLabel.config(text=matchedPath.split('/')[-1])
+            print(distance)
             # userImageInfo.config(text=userImageName.split('/')[-1])
         else:
             print("Tidak ada wajah yang cocok.")

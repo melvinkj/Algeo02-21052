@@ -161,6 +161,8 @@ def MainPage():
         global userImageName
         global dataSetName
         global executionTime
+        global percentage
+
         print("Used image :", userImageName)
         extraction_result = batch_extractor(dataSetName)
         M = len(extraction_result)
@@ -186,12 +188,17 @@ def MainPage():
         # print(weightSet)
         threshold = getThreshold(weightSet, M)
         match = True
-        index = 0
 
         match, matchedPath, distance = matcher(userImageName, dataSetName, average, weightSet, M,
                                      threshold, eigenFaces)
   
-        print(distance)
+        # Cari similarity
+        # cos (teta) = 1 - distance , semakin besar maka semakin mirip karena teta mendekati 0
+        similarity = 1 - distance
+        percentage = (int (similarity*10000)) /100 # membuat dia hanya 2 angka dibelakang koma
+        percentageLabel.config(text="( "+str(percentage)+"% )")
+
+        # jika 0, dibikin positif
         endtime = time.time()
 
         # menampilkan execution time
@@ -209,7 +216,6 @@ def MainPage():
             displayImg2 = ImageTk.PhotoImage(displayImg2)
             labelImg2.config(image=displayImg2)
             resultLabel.config(text=matchedPath.split('/')[-1])
-            print(distance)
             # userImageInfo.config(text=userImageName.split('/')[-1])
         else:
             print("Tidak ada wajah yang cocok.")

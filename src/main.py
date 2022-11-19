@@ -176,9 +176,14 @@ def MainPage():
         # print("lib")
         # print(eiglib)
         # print(eigvlib)
-        k = int(0.7*M)
+        k = int(M)
         eigenFaces = getEigenFaces(eigenSpace, a, k)
-        weightSet = getWeightSet(a, eigenFaces, M, k)
+        print("1 ")
+        weightSet = getWeightSet(a, eigenFaces, M)
+        print(weightSet)
+        # print("2 ")
+        # weightSet = weightSetC(a, eigenFaces, M)
+        # print(weightSet)
         threshold = getThreshold(weightSet, M)
         match = True
         index = 0

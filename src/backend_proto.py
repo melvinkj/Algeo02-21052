@@ -106,19 +106,15 @@ def getEigenFaces(eigenSpace, A, k):
 
     return bestOriEigenFace
 
-# def getWeight(eigenFace, )
-
 # WEIGHT SET CALCULATOR
 
 
-def getWeightSet(A, eigenFaces, M, k):
+def getWeightSet(A, eigenFaces, M):
     weightSet = [[0] for i in range(M)]
     for i in range(M):
-        for j in range(k):
-            weightSet[i] = np.matmul(A[i], np.transpose(eigenFaces))
+        weightSet[i] = np.matmul(A[i], np.transpose(eigenFaces))
 
     return weightSet
-
 
 # THRESHOLD
 
@@ -164,9 +160,12 @@ def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
             # print("distance ", i, ": ")
             # print(min)
             index = i
+            print("Ini distance ", str(i), " : ", str(min))
+
         else:
             leng = np.linalg.norm(weightSet[i]) - np.linalg.norm(weight)
             distance = np.dot(np.transpose(leng), leng)
+            print("Ini distance ", str(i), " : ", str(distance))
             # distance = np.linalg.norm(np.subtract(weight, weightSet[i]))
             # print("distance ", i, ":")
             # print(distance)
@@ -267,19 +266,21 @@ def qr(matrix):
 def find_eig(matrix):
     n, m = matrix.shape
     Qdot = np.eye(n)
-    Q, R = qr(matrix)
-    # Q, R = np.linalg.qr(matrix)
+    # Q, R = qr(matrix)
+    Q, R = np.linalg.qr(matrix)
     for i in range(100):
         Z = R.dot(Q)
         Qdot = Qdot.dot(Q)
-        Q, R = qr(matrix)
-        # Q, R = np.linalg.qr(Z)
+        # Q, R = qr(matrix)
+        Q, R = np.linalg.qr(Z)
     return np.diag(Z), Qdot
 
 
 def sorted_eig(matrix):
     eigVal, eigVec = find_eig(matrix)
     eigVec = np.transpose(eigVec)
+    for i in range (len(eigVec)):
+        eigVec[i] = np.linalg.norm(eigVec[i])
 
     # Sorting from largest to smallest eigVal
     sortedEigVal = np.sort(eigVal)[::-1]

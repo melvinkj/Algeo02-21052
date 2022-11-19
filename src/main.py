@@ -13,7 +13,6 @@ from tkinter import filedialog
 import time
 
 
-
 def WelcomePage():
 
     window = Tk()
@@ -62,10 +61,12 @@ def MainPage():
     imagePath1 = os.path.join(dirname, 'assets\profile_icon.png')
     imagePath2 = os.path.join(dirname, 'assets\profile_icon.png')
 
+    # Konfigurasi awal
     executionTime = "00:00:00"  # ini nanti diubah ke yang asli
     result = "None"
     dataSetName = "No Folder Selected"
     userImageName = "No File Selected"
+    percentage = 0
 
     window = Tk()
 
@@ -156,6 +157,7 @@ def MainPage():
         starttime = time.time()
         global userImageName
         global dataSetName
+        global executionTime
         extraction_result = batch_extractor(dataSetName)
         M = len(extraction_result)
         average = mean(extraction_result)
@@ -183,6 +185,12 @@ def MainPage():
 
         endtime = time.time()
 
+        # menampilkan execution time
+        executionTime = secondsToTime(int(endtime - starttime))
+        print("Time :" , executionTime)
+        exctTime.config(text=executionTime)
+
+
         if (match == True):
             print("Wajah yang paling cocok adalah wajah dengan file path", matchedPath)
             # labelImg2.config(image=matchedPath)
@@ -195,6 +203,7 @@ def MainPage():
             # userImageInfo.config(text=userImageName.split('/')[-1])
         else:
             print("Tidak ada wajah yang cocok.")
+        
 
         # print(extraction_result)
         # print(userImageName)
@@ -213,10 +222,15 @@ def MainPage():
     resultLabel = Label(resultContainer, text=result, font=(
         'Times', 16), background=bgColor)
     resultLabel.pack()
+    percentageLabel = Label(resultContainer, text="( "+str(percentage)+"% )", 
+                        font=('Times', 18), background=bgColor)
+    percentageLabel.pack(pady=(5,0))
 
     resultContainer.grid(row=4, column=0, pady=2)
 
-    leftContainer.pack(padx=60, side=tk.LEFT)
+    
+
+    leftContainer.pack(padx=100, side=tk.LEFT)
 
     # Create rightContainer
     rightContainer = Frame(window, background=bgColor)
@@ -271,8 +285,9 @@ def MainPage():
 
     Label(timeContainer, text="Execution Time : ", font=(
         'Times', 18), background=bgColor).pack(pady=(30, 0))
-    Label(timeContainer, text=executionTime, font=(
-        'Times', 20), background=bgColor).pack()
+    exctTime = Label(timeContainer, text=executionTime, font=(
+        'Times', 20), background=bgColor)
+    exctTime.pack()
 
     timeContainer.pack(side=tk.BOTTOM)
 
@@ -280,8 +295,7 @@ def MainPage():
 
     window.mainloop()
 
-# Main
-
+# _____ Main ______
 
 # WelcomePage()
 MainPage()

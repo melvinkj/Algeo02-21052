@@ -178,23 +178,26 @@ def MainPage():
         # print("lib")
         # print(eiglib)
         # print(eigvlib)
-        k = int(M)
+        k = int(M*0.7)
         eigenFaces = getEigenFaces(eigenSpace, a, k)
-        print("1 ")
+        # print("1 ")
         weightSet = getWeightSet(a, eigenFaces, M)
-        print(weightSet)
+        # print(weightSet)
         # print("2 ")
         # weightSet = weightSetC(a, eigenFaces, M)
         # print(weightSet)
         threshold = getThreshold(weightSet, M)
         match = True
 
-        match, matchedPath, distance = matcher(userImageName, dataSetName, average, weightSet, M,
+        match, matchedPath, distance, distanceWeight, weight = matcher(userImageName, dataSetName, average, weightSet, M,
                                      threshold, eigenFaces)
   
         # Cari similarity
         # cos (teta) = 1 - distance , semakin besar maka semakin mirip karena teta mendekati 0
-        similarity = 1 - distance
+        # distanceWeight = np.linalg.norm(distanceWeight)
+        # weight = np.linalg.norm(weight)
+
+        similarity = 1 /(1+distance)
         percentage = (int (similarity*10000)) /100 # membuat dia hanya 2 angka dibelakang koma
         percentageLabel.config(text="( "+str(percentage)+"% )")
 

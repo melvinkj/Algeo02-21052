@@ -17,7 +17,7 @@ import csv
 
 
 def extract_features(image_path, vector_size=32):
-    image = imread(image_path)
+    image = imread(image_path, 0)
     try:
         # Using KAZE, cause SIFT, ORB and other was moved to additional module
         # which is adding addtional pain during install
@@ -56,8 +56,9 @@ def batch_extractor(images_path):
     i = 0
     fileCount = 0
     for file in folder:
-        # name = file.split('\\')[-1]
-        # print('Extracting features from image %s' % name)
+        name = file.split('\\')[-1]
+        print(fileCount+1)
+        print('Extracting features from image %s' % name)
         result[fileCount] = extract_features(file)
         fileCount += 1
     return result
@@ -100,29 +101,37 @@ def kovarian(A):
 # EIGENFACE ALGORITHM
 
 
-def getEigenFaces(eigenSpace, A, k):
-    best = eigenSpace[0:k]
-    # print(np.array(best).shape)
-    # print(np.array(A).shape)
-    bestOriEigenFace = np.matmul(best, A)
+# def getEigenFaces(eigenSpace, A, k):
+#     best = eigenSpace[0:k]
+#     # print(np.array(best).shape)
+#     # print(np.array(A).shape)
+#     bestOriEigenFace = np.matmul(best, A)
 
-    return bestOriEigenFace
+#     return bestOriEigenFace
 
 # def getWeight(eigenFace, )
 
-# WEIGHT SET CALCULATOR
+
+# def getEigFace(eigenSpace, A):
+#     eigFace = np.matmul(np.transpose(A), eigenSpace)
+#     return eigFace
+# # WEIGHT SET CALCULATOR
 
 
-def getWeightSet(A, eigenFaces, M, k):
-    weightSet = [[0] for i in range(M)]
-    for i in range(M):
-        for j in range(k):
-            weightSet[i] = np.matmul(A[i], np.transpose(eigenFaces))
+# def getWeightSet(A, eigenFaces, M):
+#     weightSet = [[0] for i in range(M)]
+#     for i in range(M):
+#         weightSet[i] = np.matmul(A[i], np.transpose(eigenFaces))
 
-    return weightSet
+#     return weightSet
 
 
-# THRESHOLD
+# def weightSetC(A, eigenFaces, M):
+#     weightSet = np.matmul(np.transpose(eigenFaces), np.transpose(A))
+#     weightSet = np.transpose(weightSet)
+#     return weightSet
+# # THRESHOLD
+
 
 def getThreshold(eigenfaceWeight, M):
     for i in range(M):
@@ -140,44 +149,47 @@ def getThreshold(eigenfaceWeight, M):
     t = 0.5*max
     return t
 
-# MATCHER
+# # MATCHER
 
 
-def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
-    folder = [os.path.join(datasetName, p)
-              for p in sorted(os.listdir(datasetName))]
-    # perlu transpose input dan training set dulu
-    # print(np.array(mean).shape)
-    # print(mean)
-    selisih = A([extract_features(input)], mean)
-    # print(np.array(selisih).shape)
-    weight = [0 for i in range(M)]
+# def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
+#     folder = [os.path.join(datasetName, p)
+#               for p in sorted(os.listdir(datasetName))]
+#     # perlu transpose input dan training set dulu
+#     # print(np.array(mean).shape)
+#     # print(mean)
+#     selisih = A([extract_features(input)], mean)
+#     # print(np.array(selisih).shape)
+#     weight = [0 for i in range(M)]
 
-    weight = np.matmul(selisih[0], np.transpose(eigenfaces))
-    # print(weight)
-    # print(np.array(weight).shape)
+#     weight = np.matmul(np.transpose(eigenfaces), selisih[0])
+#     # weight = np.transpose(weight)
+#     # normWeight = np.linalg.norm(weight)
+#     # weight = weight / normWeight
+#     # print(weight)
+#     # print(np.array(weight).shape)
 
-    for i in range(M):
-        if (i == 0):
-            min = np.linalg.norm(np.subtract(weight, weightSet[i]))
-            # print("distance ", i, ": ")
-            # print(min)
-            index = i
-        else:
-            distance = np.linalg.norm(np.subtract(weight, weightSet[i]))
-            # print("distance ", i, ":")
-            # print(distance)
-            if (distance < min):
-                min = distance
-                index = i
+#     for i in range(M):
+#         if (i == 0):
+#             min = np.linalg.norm(np.subtract(weight, weightSet[i]))
+#             print("distance ", i, ": ")
+#             print(min)
+#             index = i
+#         else:
+#             distance = np.linalg.norm(np.subtract(weight, weightSet[i]))
+#             print("distance ", i, ":")
+#             print(distance)
+#             if (distance < min):
+#                 min = distance
+#                 index = i
 
-    if (min > threshold):
-        match = False
-    else:
-        match = True
-        matchedPath = folder[index]
+#     if (min > threshold):
+#         match = False
+#     else:
+#         match = True
+#         matchedPath = folder[index]
 
-    return match, matchedPath
+#     return match, matchedPath
 
 
 # QR DECOMPOSITION
@@ -263,19 +275,21 @@ def qr(matrix):
 def find_eig(matrix):
     n, m = matrix.shape
     Qdot = np.eye(n)
-    Q, R = qr(matrix)
-    # Q, R = np.linalg.qr(matrix)
+    # Q, R = qr(matrix)
+    Q, R = np.linalg.qr(matrix)
     for i in range(100):
         Z = R.dot(Q)
         Qdot = Qdot.dot(Q)
-        Q, R = qr(matrix)
-        # Q, R = np.linalg.qr(Z)
+        # Q, R = qr(matrix)
+        Q, R = np.linalg.qr(Z)
     return np.diag(Z), Qdot
 
 
 def sorted_eig(matrix):
     eigVal, eigVec = find_eig(matrix)
     eigVec = np.transpose(eigVec)
+    # for i in range(len(eigVec)):
+    #     eigVec[i] = eigVec[i] / (np.linalg.norm(eigVec))
 
     # Sorting from largest to smallest eigVal
     sortedEigVal = np.sort(eigVal)[::-1]
@@ -286,6 +300,56 @@ def sorted_eig(matrix):
     # sortedEigVec = np.transpose(sortedEigVec)
 
     return sortedEigVal, sortedEigVec
+
+
+def eigenFace(a, eigvector):
+    return np.matmul(np.transpose(a), np.transpose(eigvector))
+
+
+def weightSet(a, eigFace):
+    return np.transpose(np.matmul(np.transpose(eigFace), np.transpose(a)))
+
+
+def matcher(input, datasetName, mean, gweightSet, M, threshold, eigenfaces):
+    folder = [os.path.join(datasetName, p)
+              for p in sorted(os.listdir(datasetName))]
+    # perlu transpose input dan training set dulu
+    # print(np.array(mean).shape)
+    # print(mean)
+    selisih = np.subtract(extract_features(input), mean)
+    # print(np.array(selisih).shape)
+    weight = [0 for i in range(M)]
+
+    weight = np.transpose(
+        np.matmul(np.transpose(eigenfaces), np.transpose(selisih)))
+
+    # weight = np.transpose(weight)
+    # normWeight = np.linalg.norm(weight)
+    # weight = weight / normWeight
+    # print(weight)
+    # print(np.array(weight).shape)
+
+    for i in range(M):
+        if (i == 0):
+            min = np.linalg.norm(np.subtract(weight, gweightSet[i]))
+            print("distance ", i, ": ")
+            print(min)
+            index = i
+        else:
+            distance = np.linalg.norm(np.subtract(weight, gweightSet[i]))
+            print("distance ", i, ":")
+            print(distance)
+            if (distance < min):
+                min = distance
+                index = i
+
+    # if (min > threshold):
+    #     match = False
+    # else:
+    #     match = True
+        matchedPath = folder[index]
+
+    return matchedPath
 
 # def getEigenDiagonal(matrix):
 #     triangle = 0

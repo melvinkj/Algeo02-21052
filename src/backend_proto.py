@@ -56,6 +56,94 @@ def batch_extractor(images_path):
         
     return result
 
+# QR DECOMPOSITION
+def norm(x):
+    result = 0
+    for i in x:
+        result += (i**2)
+    result = result ** (1/2)
+    return result
+
+
+def proj(u, v):
+    result = 0
+    norm_u2 = norm(u) ** 2
+    for i in range(len(u)):
+        result += (u[i] * v[i])
+    result /= norm_u2
+    result = np.multiply(result, u)
+    return result
+
+
+def qr(matrix):
+    n = len(matrix)
+    resultQ = [[0 for i in range(n)] for j in range(n)]
+    resultQ = np.reshape(resultQ, (n, n))
+    resultQ = resultQ.astype('float')
+    arrTemp = [0 for i in range(n)]
+    for i in range(len(matrix)):
+        arrTemp = np.array(matrix[:, i])
+        arrTemp = np.reshape(arrTemp, n)
+        for j in range(0, i):
+            u = np.array(resultQ[:, j])
+            u = np.reshape(u, n)
+            arrTemp = np.subtract(arrTemp, proj(u, arrTemp))
+        for k in range(n):
+            resultQ[k][i] = arrTemp[k]
+    for x in range(n):
+        arrTemp = np.array(resultQ[:, x])
+        arrTemp = np.reshape(arrTemp, n)
+        arrTemp = np.divide(arrTemp, norm(arrTemp))
+        for y in range(n):
+            resultQ[y][x] = arrTemp[y]
+    resultR = [[0 for i in range(n)] for j in range(n)]
+    resultR = np.reshape(resultR, (n, n))
+    resultR = resultR.astype('float')
+    transpose = np.transpose(resultQ)
+    resultR = np.matmul(transpose, matrix)
+
+    return resultQ, resultR
+
+
+def qr2(A):
+    A = np.array(A, dtype=type)
+    n = len(A)
+    Q = np.array(A, dtype=type)
+    R = np.zeros((n, n), dtype=type)
+    for i in range(n):
+        for j in range(i):
+            R[j, i] = np.transpose(Q[:, j]).dot(Q[:, i])
+            Q[:, i] = Q[:, i] - R[j, i] * Q[:, j]
+        norm = 0
+        for k in range(n):
+            norm += (Q[k, i] ** 2)
+        norm = norm ** (1/2)
+        R[i, i] = norm
+        Q[:, i] = Q[:, i] / R[i, i]
+    return Q, R
+
+
+def find_eig(matrix):
+    n = len(matrix)
+    Q = np.identity(n)
+    Q, _ = qr2(Q)
+    for i in range(100):
+        Z = matrix.dot(Q)
+        Q, R = qr2(Z)
+    return np.diag(R), Q
+
+
+def sorted_eig(matrix):
+    eigVal, eigVec = find_eig(matrix)
+    eigVec = np.transpose(eigVec)
+
+    # Sorting from largest to smallest eigVal
+    sortedEigVal = np.sort(eigVal)[::-1]
+    sortedIdx = np.argsort(eigVal)[::-1]
+
+    sortedEigVec = [eigVec[i] for i in sortedIdx]
+
+    return sortedEigVal, sortedEigVec
 
 # MEAN
 def mean(extraction_result):
@@ -171,94 +259,7 @@ def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
 
     return match, matchedPath, min, distanceWeight, weight
 
-# QR DECOMPOSITION
-def norm(x):
-    result = 0
-    for i in x:
-        result += (i**2)
-    result = result ** (1/2)
-    return result
 
-
-def proj(u, v):
-    result = 0
-    norm_u2 = norm(u) ** 2
-    for i in range(len(u)):
-        result += (u[i] * v[i])
-    result /= norm_u2
-    result = np.multiply(result, u)
-    return result
-
-
-def qr(matrix):
-    n = len(matrix)
-    resultQ = [[0 for i in range(n)] for j in range(n)]
-    resultQ = np.reshape(resultQ, (n, n))
-    resultQ = resultQ.astype('float')
-    arrTemp = [0 for i in range(n)]
-    for i in range(len(matrix)):
-        arrTemp = np.array(matrix[:, i])
-        arrTemp = np.reshape(arrTemp, n)
-        for j in range(0, i):
-            u = np.array(resultQ[:, j])
-            u = np.reshape(u, n)
-            arrTemp = np.subtract(arrTemp, proj(u, arrTemp))
-        for k in range(n):
-            resultQ[k][i] = arrTemp[k]
-    for x in range(n):
-        arrTemp = np.array(resultQ[:, x])
-        arrTemp = np.reshape(arrTemp, n)
-        arrTemp = np.divide(arrTemp, norm(arrTemp))
-        for y in range(n):
-            resultQ[y][x] = arrTemp[y]
-    resultR = [[0 for i in range(n)] for j in range(n)]
-    resultR = np.reshape(resultR, (n, n))
-    resultR = resultR.astype('float')
-    transpose = np.transpose(resultQ)
-    resultR = np.matmul(transpose, matrix)
-
-    return resultQ, resultR
-
-
-def qr2(A):
-    A = np.array(A, dtype=type)
-    n = len(A)
-    Q = np.array(A, dtype=type)
-    R = np.zeros((n, n), dtype=type)
-    for i in range(n):
-        for j in range(i):
-            R[j, i] = np.transpose(Q[:, j]).dot(Q[:, i])
-            Q[:, i] = Q[:, i] - R[j, i] * Q[:, j]
-        norm = 0
-        for k in range(n):
-            norm += (Q[k, i] ** 2)
-        norm = norm ** (1/2)
-        R[i, i] = norm
-        Q[:, i] = Q[:, i] / R[i, i]
-    return Q, R
-
-
-def find_eig(matrix):
-    n = len(matrix)
-    Q = np.identity(n)
-    Q, _ = qr2(Q)
-    for i in range(100):
-        Z = matrix.dot(Q)
-        Q, R = qr2(Z)
-    return np.diag(R), Q
-
-
-def sorted_eig(matrix):
-    eigVal, eigVec = find_eig(matrix)
-    eigVec = np.transpose(eigVec)
-
-    # Sorting from largest to smallest eigVal
-    sortedEigVal = np.sort(eigVal)[::-1]
-    sortedIdx = np.argsort(eigVal)[::-1]
-
-    sortedEigVec = [eigVec[i] for i in sortedIdx]
-
-    return sortedEigVal, sortedEigVec
 
 # TEST
 # x = np.array([[1, -2], [1, 4]])

@@ -9,6 +9,7 @@ import pickle as pickle
 import random
 import os
 import matplotlib.pyplot as plt
+from math import sqrt
 
 
 # Feature extractor
@@ -90,9 +91,9 @@ def A(extraction_result, mean):
 def kovarian(A):
     kovarian = np.matmul(A, np.transpose(A))
     n = len(kovarian)
-    for i in range(n):
-        for j in range(n):
-            kovarian[i][j] = round(kovarian[i][j], 3)
+    # for i in range(n):
+    #     for j in range(n):
+    #         kovarian[i][j] = round(kovarian[i][j], 3)
     return kovarian
 
 # EIGENFACE ALGORITHM
@@ -129,13 +130,21 @@ def getWeightSet(A, eigenFaces, M):
 def getThreshold(eigenfaceWeight, M):
     for i in range(M):
         start = i+1
+        sum = 0
+        for k in range (len(eigenfaceWeight[i])):
+            sum += eigenfaceWeight[i][k]**2
+        magnitude1 = sqrt(sum)
         for j in range(start, M):
+            sum = 0
+            for k in range (len(eigenfaceWeight[j])):
+                sum += eigenfaceWeight[j][k]**2
+            magnitude2 = sqrt(sum)
             if (i == 0 and j == 1):
                 # leng = np.linalg.norm(eigenfaceWeight[j]) - np.linalg.norm(eigenfaceWeight[i])
-                leng = (eigenfaceWeight[j]/np.linalg.norm(eigenfaceWeight[j])) - (eigenfaceWeight[i]/np.linalg.norm(eigenfaceWeight[i]))
+                leng = (eigenfaceWeight[j]/magnitude2) - (eigenfaceWeight[i]/magnitude1)
                 max = np.dot(np.transpose(leng), leng)
             else:
-                curr = (eigenfaceWeight[j]/np.linalg.norm(eigenfaceWeight[j])) - (eigenfaceWeight[i]/np.linalg.norm(eigenfaceWeight[i]))
+                curr = (eigenfaceWeight[j]/magnitude2) - (eigenfaceWeight[i]/magnitude1)
                 # curr = eigenfaceWeight[j] - eigenfaceWeight[i]
                 distance = np.dot(np.transpose(curr), curr)
                 if (max < distance):
@@ -228,11 +237,20 @@ def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
     # print(weight)
     # print(weight)
     # print(np.array(weight).shape)
+    sum = 0
+    for k in range (len(weight)):
+        sum += weight[k]**2
+    magnitude1 = sqrt(sum)
 
     for i in range(M):
+        sum = 0
+        for k in range (len(weightSet[i])):
+            sum += weightSet[i][k]**2
+        magnitude2 = sqrt(sum)
         if (i == 0):
+            sum = 0
             # leng = np.linalg.norm(weightSet[i]) - np.linalg.norm(weight)
-            leng = (weightSet[i]/np.linalg.norm(weightSet[i])) - (weight/np.linalg.norm(weight))
+            leng = (weightSet[i]/magnitude2) - (weight/magnitude1)
             min = np.dot(np.transpose(leng), leng)
             # min = np.linalg.norm(np.subtract(weight, weightSet[i]))
             # print("distance ", i, ": ")
@@ -241,8 +259,9 @@ def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
             distanceWeight = leng
         else:
             # leng = np.linalg.norm(weightSet[i]) - np.linalg.norm(weight)
-            leng = (weightSet[i]/np.linalg.norm(weightSet[i])) - (weight/np.linalg.norm(weight))
+            leng = (weightSet[i]/magnitude2) - (weight/magnitude1)
             distance = np.dot(np.transpose(leng), leng)
+            print(distance)
             # print("Ini min")
             # print(min)
             # print("ini distance")
@@ -254,6 +273,8 @@ def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
                 min = distance
                 index = i
                 distanceWeight = leng
+        # if (min == 0):
+        #     break
 
     if (min > threshold):
         match = False
@@ -348,13 +369,13 @@ def qr(matrix):
 def find_eig(matrix):
     n, m = matrix.shape
     Qdot = np.eye(n)
-    # Q, R = qr(matrix)
-    Q, R = np.linalg.qr(matrix)
+    Q, R = qr(matrix)
+    # Q, R = np.linalg.qr(matrix)
     for i in range(100):
         Z = R.dot(Q)
         Qdot = Qdot.dot(Q)
-        # Q, R = qr(matrix)
-        Q, R = np.linalg.qr(Z)
+        Q, R = qr(matrix)
+        # Q, R = np.linalg.qr(Z)
     return np.diag(Z), Qdot
 
 

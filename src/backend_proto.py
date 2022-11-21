@@ -9,6 +9,7 @@ import pickle as pickle
 import random
 import os
 import matplotlib.pyplot as plt
+from math import sqrt
 
 
 # Feature extractor
@@ -90,9 +91,9 @@ def A(extraction_result, mean):
 def kovarian(A):
     kovarian = np.matmul(A, np.transpose(A))
     n = len(kovarian)
-    for i in range(n):
-        for j in range(n):
-            kovarian[i][j] = round(kovarian[i][j], 3)
+    # for i in range(n):
+    #     for j in range(n):
+    #         kovarian[i][j] = round(kovarian[i][j], 3)
     return kovarian
 
 # EIGENFACE ALGORITHM
@@ -102,8 +103,16 @@ def getEigenFaces(eigenSpace, A, k):
     best = eigenSpace[0:k]
     # print(np.array(best).shape)
     # print(np.array(A).shape)
+    # print("Ini best")
+    # print(np.array(best).shape)
+    # print(best)
+    # print("Ini A")
+    # print(np.array(A).shape)
+    # print(A)
     bestOriEigenFace = np.matmul(best, A)
-
+    # print(bestOriEigenFace)
+    # print("Ini best ori")
+    # print(bestOriEigenFace)
     return bestOriEigenFace
 
 # WEIGHT SET CALCULATOR
@@ -121,23 +130,94 @@ def getWeightSet(A, eigenFaces, M):
 def getThreshold(eigenfaceWeight, M):
     for i in range(M):
         start = i+1
+        sum = 0
+        for k in range (len(eigenfaceWeight[i])):
+            sum += eigenfaceWeight[i][k]**2
+        magnitude1 = sqrt(sum)
         for j in range(start, M):
+            sum = 0
+            for k in range (len(eigenfaceWeight[j])):
+                sum += eigenfaceWeight[j][k]**2
+            magnitude2 = sqrt(sum)
             if (i == 0 and j == 1):
-                leng = np.linalg.norm(eigenfaceWeight[j]) - np.linalg.norm(eigenfaceWeight[i])
+                # leng = np.linalg.norm(eigenfaceWeight[j]) - np.linalg.norm(eigenfaceWeight[i])
+                leng = (eigenfaceWeight[j]/magnitude2) - (eigenfaceWeight[i]/magnitude1)
                 max = np.dot(np.transpose(leng), leng)
             else:
-                curr = np.linalg.norm(eigenfaceWeight[j]) - np.linalg.norm(eigenfaceWeight[i])
+                curr = (eigenfaceWeight[j]/magnitude2) - (eigenfaceWeight[i]/magnitude1)
+                # curr = eigenfaceWeight[j] - eigenfaceWeight[i]
                 distance = np.dot(np.transpose(curr), curr)
                 if (max < distance):
                     max = distance
 
     t = 0.5*max
+    print("Ini threshold")
     print(t)
     return t
 
 # MATCHER
 
 
+# def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
+#     folder = [os.path.join(datasetName, p)
+#               for p in sorted(os.listdir(datasetName))]
+#     # perlu transpose input dan training set dulu
+#     # print(np.array(mean).shape)
+#     # print(mean)
+#     selisih = A([extract_features(input)], mean)
+#     # print(np.array(selisih).shape)
+#     weight = [0 for i in range(M)]
+
+#     weight = np.matmul(selisih[0], np.transpose(eigenfaces))
+#     # print(weight)
+#     # print(np.array(weight).shape)
+
+#     for i in range(M):
+#         # Normalisasi vektor
+#         # norm_i = np.linalg.norm(weightSet[i])
+#         # norm = np.linalg.norm(weight)
+#         # vecNorm_i = np.multiply(weightSet[i], 1/norm_i)
+#         # vecNorm = np.multiply(weight, 1/norm)
+
+#         # Formula Euclidean Distance 
+#         subResult = np.subtract(weightSet[i], weight)
+#         normResult = np.linalg.norm(subResult)
+#         distance = (normResult**2)/2
+
+#         # Rumus cos(teta) = 1 - ||x-x'||^2 / 2 = cos (teta)
+#         # nilai distance adalah ||x-x'|| ^2 /2 , boleh lebih dari 1. Namun bila lebih dari satu maka dikurangi 1 (mendekati cos 0)
+#         if (distance > 1):
+#             distance -=1
+
+#         print("index", i+1, ": ", distance)
+#         if (i == 0):
+#             min = distance
+#             # min = np.linalg.norm(np.subtract(weight, weightSet[i]))
+#             # print("distance ", i, ": ")
+#             # print(min)
+#             index = i
+#             print("Ini distance ", str(i), " : ", str(min))
+
+#         else:
+#             leng = np.linalg.norm(weightSet[i]) - np.linalg.norm(weight)
+#             distance = np.dot(np.transpose(leng), leng)
+#             print("Ini distance ", str(i), " : ", str(distance))
+#             # distance = np.linalg.norm(np.subtract(weight, weightSet[i]))
+#             # print("distance ", i, ":")
+#             # print(distance)
+#             if (distance < min):
+#                 min = distance
+#                 index = i
+
+#     if (min > threshold):
+#         # Kasus tidak ada yang mirip
+#         match = False
+#     else:
+#         match = True
+#         matchedPath = folder[index]
+
+
+#     return match, matchedPath, min
 def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
     folder = [os.path.join(datasetName, p)
               for p in sorted(os.listdir(datasetName))]
@@ -145,60 +225,66 @@ def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
     # print(np.array(mean).shape)
     # print(mean)
     selisih = A([extract_features(input)], mean)
+    # print("Ini selisih:")
+    # print(selisih)
     # print(np.array(selisih).shape)
     weight = [0 for i in range(M)]
-
+    # print("Ini eigenfaces:")
+    # print(eigenfaces)
+    
     weight = np.matmul(selisih[0], np.transpose(eigenfaces))
+    # print("Ini weight: ")
+    # print(weight)
     # print(weight)
     # print(np.array(weight).shape)
+    sum = 0
+    for k in range (len(weight)):
+        sum += weight[k]**2
+    magnitude1 = sqrt(sum)
 
     for i in range(M):
-        # Normalisasi vektor
-        norm_i = np.linalg.norm(weightSet[i])
-        norm = np.linalg.norm(weight)
-        vecNorm_i = np.multiply(weightSet[i], 1/norm_i)
-        vecNorm = np.multiply(weight, 1/norm)
-
-        # Formula Euclidean Distance 
-        subResult = np.subtract(vecNorm_i, vecNorm)
-        normResult = np.linalg.norm(subResult)
-        distance = (normResult**2)/2
-
-        # Rumus cos(teta) = 1 - ||x-x'||^2 / 2 = cos (teta)
-        # nilai distance adalah ||x-x'|| ^2 /2 , boleh lebih dari 1. Namun bila lebih dari satu maka dikurangi 1 (mendekati cos 0)
-        if (distance > 1):
-            distance -=1
-
-        print("index", i+1, ": ", distance)
+        sum = 0
+        for k in range (len(weightSet[i])):
+            sum += weightSet[i][k]**2
+        magnitude2 = sqrt(sum)
         if (i == 0):
-            min = distance
+            sum = 0
+            # leng = np.linalg.norm(weightSet[i]) - np.linalg.norm(weight)
+            leng = (weightSet[i]/magnitude2) - (weight/magnitude1)
+            min = np.dot(np.transpose(leng), leng)
             # min = np.linalg.norm(np.subtract(weight, weightSet[i]))
             # print("distance ", i, ": ")
             # print(min)
             index = i
-            print("Ini distance ", str(i), " : ", str(min))
-
+            distanceWeight = leng
         else:
-            leng = np.linalg.norm(weightSet[i]) - np.linalg.norm(weight)
+            # leng = np.linalg.norm(weightSet[i]) - np.linalg.norm(weight)
+            leng = (weightSet[i]/magnitude2) - (weight/magnitude1)
             distance = np.dot(np.transpose(leng), leng)
-            print("Ini distance ", str(i), " : ", str(distance))
+            print(distance)
+            # print("Ini min")
+            # print(min)
+            # print("ini distance")
+            # print(distance)
             # distance = np.linalg.norm(np.subtract(weight, weightSet[i]))
             # print("distance ", i, ":")
             # print(distance)
             if (distance < min):
                 min = distance
                 index = i
+                distanceWeight = leng
+        # if (min == 0):
+        #     break
 
     if (min > threshold):
-        # Kasus tidak ada yang mirip
         match = False
     else:
         match = True
         matchedPath = folder[index]
 
-
-    return match, matchedPath, min
-
+    print("Ini distance")
+    print(min)
+    return match, matchedPath, min, distanceWeight, weight
 
 # QR DECOMPOSITION
 
@@ -283,21 +369,21 @@ def qr(matrix):
 def find_eig(matrix):
     n, m = matrix.shape
     Qdot = np.eye(n)
-    # Q, R = qr(matrix)
-    Q, R = np.linalg.qr(matrix)
+    Q, R = qr(matrix)
+    # Q, R = np.linalg.qr(matrix)
     for i in range(100):
         Z = R.dot(Q)
         Qdot = Qdot.dot(Q)
-        # Q, R = qr(matrix)
-        Q, R = np.linalg.qr(Z)
+        Q, R = qr(matrix)
+        # Q, R = np.linalg.qr(Z)
     return np.diag(Z), Qdot
 
 
 def sorted_eig(matrix):
     eigVal, eigVec = find_eig(matrix)
     eigVec = np.transpose(eigVec)
-    for i in range (len(eigVec)):
-        eigVec[i] = np.linalg.norm(eigVec[i])
+    # for i in range (len(eigVec)):
+    #     eigVec[i] = np.linalg.norm(eigVec[i])
 
     # Sorting from largest to smallest eigVal
     sortedEigVal = np.sort(eigVal)[::-1]

@@ -127,24 +127,27 @@ def getWeightSet(A, eigenFaces, M):
 
 # THRESHOLD
 
+
 def getThreshold(eigenfaceWeight, M):
     for i in range(M):
         start = i+1
         sum = 0
-        for k in range (len(eigenfaceWeight[i])):
+        for k in range(len(eigenfaceWeight[i])):
             sum += eigenfaceWeight[i][k]**2
         magnitude1 = sqrt(sum)
         for j in range(start, M):
             sum = 0
-            for k in range (len(eigenfaceWeight[j])):
+            for k in range(len(eigenfaceWeight[j])):
                 sum += eigenfaceWeight[j][k]**2
             magnitude2 = sqrt(sum)
             if (i == 0 and j == 1):
                 # leng = np.linalg.norm(eigenfaceWeight[j]) - np.linalg.norm(eigenfaceWeight[i])
-                leng = (eigenfaceWeight[j]/magnitude2) - (eigenfaceWeight[i]/magnitude1)
+                leng = (eigenfaceWeight[j]/magnitude2) - \
+                    (eigenfaceWeight[i]/magnitude1)
                 max = np.dot(np.transpose(leng), leng)
             else:
-                curr = (eigenfaceWeight[j]/magnitude2) - (eigenfaceWeight[i]/magnitude1)
+                curr = (eigenfaceWeight[j]/magnitude2) - \
+                    (eigenfaceWeight[i]/magnitude1)
                 # curr = eigenfaceWeight[j] - eigenfaceWeight[i]
                 distance = np.dot(np.transpose(curr), curr)
                 if (max < distance):
@@ -179,7 +182,7 @@ def getThreshold(eigenfaceWeight, M):
 #         # vecNorm_i = np.multiply(weightSet[i], 1/norm_i)
 #         # vecNorm = np.multiply(weight, 1/norm)
 
-#         # Formula Euclidean Distance 
+#         # Formula Euclidean Distance
 #         subResult = np.subtract(weightSet[i], weight)
 #         normResult = np.linalg.norm(subResult)
 #         distance = (normResult**2)/2
@@ -231,20 +234,20 @@ def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
     weight = [0 for i in range(M)]
     # print("Ini eigenfaces:")
     # print(eigenfaces)
-    
+
     weight = np.matmul(selisih[0], np.transpose(eigenfaces))
     # print("Ini weight: ")
     # print(weight)
     # print(weight)
     # print(np.array(weight).shape)
     sum = 0
-    for k in range (len(weight)):
+    for k in range(len(weight)):
         sum += weight[k]**2
     magnitude1 = sqrt(sum)
 
     for i in range(M):
         sum = 0
-        for k in range (len(weightSet[i])):
+        for k in range(len(weightSet[i])):
             sum += weightSet[i][k]**2
         magnitude2 = sqrt(sum)
         if (i == 0):
@@ -337,6 +340,38 @@ def qr(matrix):
     return resultQ, resultR
 
 
+def conj_transpose(a):
+    return np.conj(np.transpose(a))
+
+
+def proj_ab(a, b):
+    return a.dot(conj_transpose(b)) / np.linalg.norm(b) * b
+
+
+def qr_gs(A, type=complex):
+    A = np.array(A, dtype=type)
+    (m, n) = np.shape(A)
+
+    (m, n) = (m, n) if m > n else (m, m)
+
+    Q = np.zeros((m, n), dtype=type)
+    R = np.zeros((m, n), dtype=type)
+
+    for k in range(n):
+        pr_sum = np.zeros(m, dtype=type)
+
+        for j in range(k):
+            pr_sum += proj_ab(A[:, k], Q[:, j])
+
+        Q[:, k] = A[:, k] - pr_sum
+        Q[:, k] = Q[:, k] / np.linalg.norm(Q[:, k])
+
+    if type == complex:
+        R = conj_transpose(Q).dot(A)
+    else:
+        R = np.transpose(Q).dot(A)
+
+    return -Q, -R
 # def qrGetR(q, matrix):
 #     n = len(matrix)
 #     result = [[0 for i in range(n)] for j in range(n)]
@@ -366,17 +401,19 @@ def qr(matrix):
 #         Q = qrGetQ(Z)
 #         R = qrGetR(Q, Z)
 #     return np.diag(Z), Qdot
+
+
 def find_eig(matrix):
     n, m = matrix.shape
-    Qdot = np.eye(n)
-    Q, R = qr(matrix)
+    Q = np.random.rand(n, n)
+    # Q, _ = np.linalg.qr(Q)
+    Q, _ = qr(Q)
     # Q, R = np.linalg.qr(matrix)
     for i in range(100):
-        Z = R.dot(Q)
-        Qdot = Qdot.dot(Q)
-        Q, R = qr(Z)
+        Z = matrix.dot(Q)
         # Q, R = np.linalg.qr(Z)
-    return np.diag(Z), Qdot
+        Q, R = qr(Z)
+    return np.diag(Z), Q
 
 
 def sorted_eig(matrix):

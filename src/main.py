@@ -169,24 +169,11 @@ def MainPage():
         a = A(extraction_result, average)
         cov = kovarian(a)
         eigenValue, eigenSpace = sorted_eig(cov)
-        # eiglib, eigvlib = eig(cov)
-        # print("hitung: ")
-        # print(eigenValue)
-        # print(eigenSpace)
-
-        # print("lib")
-        # print(eiglib)
-        # print(eigvlib)
         k = int(M*0.7)
         eigenFaces = getEigenFaces(eigenSpace, a, k)
-        # print(eigenFaces)
-        # print("1 ")
+
         weightSet = getWeightSet(a, eigenFaces, M)
-        # print(weightSet)
-        # print("2 ")
-        # weightSet = weightSetC(a, eigenFaces, M)
-        # print(weightSet)
-        # threshold = getThreshold(weightSet, M)
+ 
         threshold = 1.8571428571
         match = True
 
@@ -194,10 +181,6 @@ def MainPage():
                                                                        threshold, eigenFaces)
 
         # Cari similarity
-        # cos (teta) = 1 - distance , semakin besar maka semakin mirip karena teta mendekati 0
-        # distanceWeight = np.linalg.norm(distanceWeight)
-        # weight = np.linalg.norm(weight)
-
         similarity = 1 / (1+distance)
         # membuat dia hanya 2 angka dibelakang koma
         percentage = (int(similarity*10000)) / 100
@@ -224,8 +207,6 @@ def MainPage():
         else:
             print("Tidak ada wajah yang cocok.")
 
-        # print(extraction_result)
-        # print(userImageName)
     startBtn = Button(leftContainer, text="Start Program", font=(
         "Times", 22), background="#decdb9", width=15, command=faceRecognition)
 

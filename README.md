@@ -2,11 +2,11 @@
 **Tugas Besar 2 - IF2123 Aljabar Linier dan Geometri**
 
 ## **Table of Contents**
-* [Program Description](#program_description)
-* [How to Run Program](#how_to_run_program)
-* [Team Members](#team_members)
-* [Job Description](#job_description)
-* [Folders and Files Description](#folders_and_files_description)
+* [Program Description](#program-description)
+* [How to Run Program](#how-to-run_program)
+* [Team Members](#team-members)
+* [Job Description](#job-description)
+* [Folders and Files Description](#folders-and-files-description)
 * [Screenshots](#screenshots)
 * [Extras](#extras)
 

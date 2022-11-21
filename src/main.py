@@ -12,13 +12,22 @@ from tkinter import filedialog
 import time
 
 
+
 def WelcomePage():
 
     window = Tk()
     window.title('Face Recognition using Eigenface - Welcome Page')
-    window.geometry("1200x720")
+
+    width= window.winfo_screenwidth()
+    height= window.winfo_screenheight()
+    window.geometry("%dx%d" % (width, height))
+    window.bind("<F11>", lambda event: window.attributes("-fullscreen",
+                                    not window.attributes("-fullscreen")))
+    window.bind("<Escape>", lambda event: window.attributes("-fullscreen", False))
+
     bgColor = "#ececec"
     window.configure(background=bgColor)
+    window.attributes('-fullscreen', True)
 
     # leftContainer
     leftContainer = Frame(window)
@@ -69,11 +78,20 @@ def MainPage():
 
     window = Tk()
 
-    # App Title and Size
+    # Getting screen width and height of display
     bgColor = "#fffde7"
+    # App Title and Size
     window.title('Face Recognition using Eigenface - Main Page')
-    window.geometry("1200x720")
+
+    width= window.winfo_screenwidth()
+    height= window.winfo_screenheight()
+    window.geometry("%dx%d" % (width, height))
+    window.bind("<F11>", lambda event: window.attributes("-fullscreen",
+                                    not window.attributes("-fullscreen")))
+    window.bind("<Escape>", lambda event: window.attributes("-fullscreen", False))
+
     window.configure(background=bgColor)
+    window.attributes('-fullscreen', True)
 
     # Displaying Title
     appTitle = Label(window, text="Face Recognition", font=(

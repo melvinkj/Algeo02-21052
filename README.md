@@ -2,15 +2,16 @@
 **Tugas Besar 2 - IF2123 Aljabar Linier dan Geometri**
 
 ## **Table of Contents**
-* [Program Description](#program_desc)
-* [How to Run Program](#program_tutorial)
-* [Team Members](#team_member)
-* [Job Description](#job_desc)
-* [Folders and Files Description](#folders_files_desc)
+* [Program Description](#program_description)
+* [How to Run Program](#how_to_run_program)
+* [Team Members](#team_members)
+* [Job Description](#job_description)
+* [Folders and Files Description](#folders_and_files_description)
 * [Screenshots](#screenshots)
 * [Extras](#extras)
 
 ## **Program Description**
+*Face recognition* is a biometric technology that is usually used to identify one's face for several importances, especially security. Face recognition program involves a group of stored face images in the database, and based on those face images, the program will learn various form of faces and try to match those learned face images to an image that is being identified. In this project, the face recognition algorithm is constructed using Eigenface.
 
 ## **How to Run Program**
 1. Clone this repository <br>
@@ -60,7 +61,7 @@
 
 
 ## **Folders and Files Description**
-### Folder *src*
+#### **Folder *src***
 1. Folder *assets* <br>
 Contains images used on the GUI of the program.
 2. File *main.py* <br>
@@ -71,9 +72,9 @@ Contains main program supporting functions and procedures.
 Contains all face recognition algorithms.
 5. File *cam.py* <br>
 Contains face detection algorithm by camera.
-### Folder *test*
+#### **Folder *test***
 Can be categorized as two aspects. First, the camInput folder contains the face image detected by camera when the program is activated. On the other hand, "training_set" folders contain data set images.
-### Folder *doc*
+#### **Folder *doc***
 Contains the report documentation of the program.
 
 

@@ -186,7 +186,8 @@ def MainPage():
         # print("2 ")
         # weightSet = weightSetC(a, eigenFaces, M)
         # print(weightSet)
-        threshold = getThreshold(weightSet, M)
+        # threshold = getThreshold(weightSet, M)
+        threshold = 1.8571428571
         match = True
 
         match, matchedPath, distance, distanceWeight, weight = matcher(userImageName, dataSetName, average, weightSet, M,

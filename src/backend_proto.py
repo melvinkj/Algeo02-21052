@@ -374,7 +374,7 @@ def find_eig(matrix):
     for i in range(100):
         Z = R.dot(Q)
         Qdot = Qdot.dot(Q)
-        Q, R = qr(matrix)
+        Q, R = qr(Z)
         # Q, R = np.linalg.qr(Z)
     return np.diag(Z), Qdot
 

@@ -10,6 +10,7 @@ import random
 import os
 import matplotlib.pyplot as plt
 from math import sqrt
+# from numpy.linalg import eig
 
 
 # Feature extractor
@@ -264,7 +265,7 @@ def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
             # leng = np.linalg.norm(weightSet[i]) - np.linalg.norm(weight)
             leng = (weightSet[i]/magnitude2) - (weight/magnitude1)
             distance = np.dot(np.transpose(leng), leng)
-            print(distance)
+            # print(distance)
             # print("Ini min")
             # print(min)
             # print("ini distance")
@@ -285,8 +286,8 @@ def matcher(input, datasetName, mean, weightSet, M, threshold, eigenfaces):
         match = True
         matchedPath = folder[index]
 
-    print("Ini distance")
-    print(min)
+    # print("Ini distance")
+    # print(min)
     return match, matchedPath, min, distanceWeight, weight
 
 # QR DECOMPOSITION
@@ -340,80 +341,36 @@ def qr(matrix):
     return resultQ, resultR
 
 
-def conj_transpose(a):
-    return np.conj(np.transpose(a))
-
-
-def proj_ab(a, b):
-    return a.dot(conj_transpose(b)) / np.linalg.norm(b) * b
-
-
-def qr_gs(A, type=complex):
+def qr2(A):
     A = np.array(A, dtype=type)
-    (m, n) = np.shape(A)
-
-    (m, n) = (m, n) if m > n else (m, m)
-
-    Q = np.zeros((m, n), dtype=type)
-    R = np.zeros((m, n), dtype=type)
-
-    for k in range(n):
-        pr_sum = np.zeros(m, dtype=type)
-
-        for j in range(k):
-            pr_sum += proj_ab(A[:, k], Q[:, j])
-
-        Q[:, k] = A[:, k] - pr_sum
-        Q[:, k] = Q[:, k] / np.linalg.norm(Q[:, k])
-
-    if type == complex:
-        R = conj_transpose(Q).dot(A)
-    else:
-        R = np.transpose(Q).dot(A)
-
-    return -Q, -R
-# def qrGetR(q, matrix):
-#     n = len(matrix)
-#     result = [[0 for i in range(n)] for j in range(n)]
-#     result = np.reshape(result, (n, n))
-#     transpose = np.transpose(q)
-#     result = np.matmul(transpose, matrix)
-#     return result
-
-
-# def cekTriangle(matrix):
-#     triangle = 1
-#     n = len(matrix)
-#     for i in range(1, n):
-#         for j in range(0, i):
-#             if (matrix[i][j] > 0.0001 or matrix[i][j] < -0.0001):
-#                 triangle = 0
-#     return triangle
-
-# def find_eig(matrix):
-#     n, m = matrix.shape
-#     Qdot = np.eye(n)
-#     Q = qrGetQ(matrix)
-#     R = qrGetR(Q, matrix)
-#     for i in range(100):
-#         Z = R.dot(Q)
-#         Qdot = Qdot.dot(Q)
-#         Q = qrGetQ(Z)
-#         R = qrGetR(Q, Z)
-#     return np.diag(Z), Qdot
+    n = len(A)
+    Q = np.array(A, dtype=type)
+    R = np.zeros((n, n), dtype=type)
+    for i in range(n):
+        for j in range(i):
+            R[j, i] = np.transpose(Q[:, j]).dot(Q[:, i])
+            Q[:, i] = Q[:, i] - R[j, i] * Q[:, j]
+        norm = 0
+        for k in range(n):
+            norm += (Q[k, i] ** 2)
+        norm = norm ** (1/2)
+        R[i, i] = norm
+        Q[:, i] = Q[:, i] / R[i, i]
+    return Q, R
 
 
 def find_eig(matrix):
-    n, m = matrix.shape
-    Q = np.random.rand(n, n)
+    n = len(matrix)
+    Q = np.identity(n)
+    # Q, _ = qr(Q)
     # Q, _ = np.linalg.qr(Q)
-    Q, _ = qr(Q)
-    # Q, R = np.linalg.qr(matrix)
+    Q, _ = qr2(Q)
     for i in range(100):
         Z = matrix.dot(Q)
         # Q, R = np.linalg.qr(Z)
-        Q, R = qr(Z)
-    return np.diag(Z), Q
+        # Q, R = qr(Z)
+        Q, R = qr2(Z)
+    return np.diag(R), Q
 
 
 def sorted_eig(matrix):
@@ -431,26 +388,6 @@ def sorted_eig(matrix):
     # sortedEigVec = np.transpose(sortedEigVec)
 
     return sortedEigVal, sortedEigVec
-
-# def getEigenDiagonal(matrix):
-#     triangle = 0
-#     while (triangle == 0):
-#         q = qrGetQ(matrix)
-#         r = qrGetR(q, matrix)
-#         x = np.matmul(r, q)
-#         n = len(matrix)
-#         triangle = cekTriangle(x)
-#         if (triangle == 0):
-#             matrix = x
-#     eigenVal = [0 for i in range(n)]
-#     eigenVal = np.array(eigenVal)
-#     eigenVal = eigenVal.astype('float')
-#     for i in range(n):
-#         eigenVal[i] = x[i][i]
-#         eigenVal[i] = round(eigenVal[i], 3)
-
-#     eigenVal=sorted(eigenVal.tolist(), reverse=True)
-#     return eigenVal
 
 
 # def getEigenSpace(matrix):
@@ -520,4 +457,22 @@ def sorted_eig(matrix):
 # x = np.array([[4,0,1],[-2,1,0],[-2,0,1]])
 # e,v = find_eig(x)
 # print(e)
+# print(v)
+
+# x = np.array([[1, -2, 4, 5], [-2, 0, 1, 7], [4, 1, -3, 4], [5, 7, 4, 1]])
+# libe, libv = np.linalg.qr(x)
+# eiglib, vlib = eig(x)
+# print('lib: ')
+# print(libv)
+# print('eigenval1: ')
+# print(eiglib)
+# print(vlib)
+
+
+# eigs, eigvs = qr2(x)
+# eigsyey, v = find_eig(x)
+# print('schurz: ')
+# print(eigvs)
+# print('eigenval2: ')
+# print(eigsyey)
 # print(v)

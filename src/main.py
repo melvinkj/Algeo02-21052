@@ -45,7 +45,7 @@ def WelcomePage():
     subtitle.grid(row=1, column=0, pady=(0, 50))
 
     mainPageBtn = Button(rightContainer, text="Go To Main Page", font=(
-        "Times", 20), background=bgColor, command= window.destroy)
+        "Times", 20), background=bgColor, command=window.destroy)
     mainPageBtn.grid(row=2, column=0)
 
     rightContainer.pack(pady=(100, 0))
@@ -102,9 +102,9 @@ def MainPage():
     dataSetBtn.bind("<Enter>", on_enter)
     dataSetBtn.bind("<Leave>", on_leave)
     dataSetBtn.pack(side="left", pady=10)
-    datasetInfo = Label(dataSetContainer,background= bgColor,
+    datasetInfo = Label(dataSetContainer, background=bgColor,
                         text=dataSetName, font=("Times", 12))
-    datasetInfo.pack(side=tk.RIGHT, padx=(10,0))
+    datasetInfo.pack(side=tk.RIGHT, padx=(10, 0))
 
     dataSetContainer.grid(row=0, column=0, pady=2, padx=20, sticky="e")
 
@@ -129,14 +129,14 @@ def MainPage():
     userImageBtn.bind("<Enter>", on_enter)
     userImageBtn.bind("<Leave>", on_leave)
     userImageBtn.pack(side="left", pady=10)
-    userImageInfo = Label(userImageContainer, background= bgColor,
+    userImageInfo = Label(userImageContainer, background=bgColor,
                           text=userImageName, font=("Times", 12))
-    userImageInfo.pack(side=tk.RIGHT, padx=(10,0))
+    userImageInfo.pack(side=tk.RIGHT, padx=(10, 0))
 
     userImageContainer.grid(row=1, column=0, pady=2)
-    
 
     # Camera button
+
     def inputImageByCam():
         CamPage()
         global displayImg1
@@ -147,12 +147,11 @@ def MainPage():
         displayImg1 = readImage(imagePath1)
         labelImg1.config(image=displayImg1)
 
-
-    camBtn = Button(leftContainer, text="Input by Camera", font=("Times", 16), 
-                    background="#d4caa3", width=15, command= inputImageByCam)
+    camBtn = Button(leftContainer, text="Input by Camera", font=("Times", 16),
+                    background="#d4caa3", width=15, command=inputImageByCam)
     camBtn.bind("<Enter>", on_cam_enter)
     camBtn.bind("<Leave>", on_cam_leave)
-    
+
     camBtn.grid(row=2, column=0, pady=10)
 
     # Start Button
@@ -180,6 +179,7 @@ def MainPage():
         # print(eigvlib)
         k = int(M*0.7)
         eigenFaces = getEigenFaces(eigenSpace, a, k)
+        # print(eigenFaces)
         # print("1 ")
         weightSet = getWeightSet(a, eigenFaces, M)
         # print(weightSet)
@@ -191,15 +191,16 @@ def MainPage():
         match = True
 
         match, matchedPath, distance, distanceWeight, weight = matcher(userImageName, dataSetName, average, weightSet, M,
-                                     threshold, eigenFaces)
-  
+                                                                       threshold, eigenFaces)
+
         # Cari similarity
         # cos (teta) = 1 - distance , semakin besar maka semakin mirip karena teta mendekati 0
         # distanceWeight = np.linalg.norm(distanceWeight)
         # weight = np.linalg.norm(weight)
 
-        similarity = 1 /(1+distance)
-        percentage = (int (similarity*10000)) /100 # membuat dia hanya 2 angka dibelakang koma
+        similarity = 1 / (1+distance)
+        # membuat dia hanya 2 angka dibelakang koma
+        percentage = (int(similarity*10000)) / 100
         percentageLabel.config(text="( "+str(percentage)+"% )")
 
         # jika 0, dibikin positif
@@ -207,9 +208,8 @@ def MainPage():
 
         # menampilkan execution time
         executionTime = secondsToTime(int(endtime - starttime))
-        print("Time :" , executionTime)
+        print("Time :", executionTime)
         exctTime.config(text=executionTime)
-
 
         if (match == True):
             print("Wajah yang paling cocok adalah wajah dengan file path", matchedPath)
@@ -223,7 +223,6 @@ def MainPage():
             # userImageInfo.config(text=userImageName.split('/')[-1])
         else:
             print("Tidak ada wajah yang cocok.")
-        
 
         # print(extraction_result)
         # print(userImageName)
@@ -242,13 +241,11 @@ def MainPage():
     resultLabel = Label(resultContainer, text=result, font=(
         'Times', 16), background=bgColor)
     resultLabel.pack()
-    percentageLabel = Label(resultContainer, text="( "+str(percentage)+"% )", 
-                        font=('Times', 18), background=bgColor)
-    percentageLabel.pack(pady=(5,0))
+    percentageLabel = Label(resultContainer, text="( "+str(percentage)+"% )",
+                            font=('Times', 18), background=bgColor)
+    percentageLabel.pack(pady=(5, 0))
 
     resultContainer.grid(row=4, column=0, pady=2)
-
-    
 
     leftContainer.pack(padx=100, side=tk.LEFT)
 
@@ -316,6 +313,7 @@ def MainPage():
     window.mainloop()
 
 # _____ Main ______
+
 
 # WelcomePage()
 MainPage()

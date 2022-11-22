@@ -50,13 +50,13 @@
 
 | Report Assignments | Progress Status |
 |------------------------ | ----------------|
-| Cover, Table of Contents, Table of Images | |
+| Cover, Table of Contents, Table of Images |D DONE |
 | Chapter 1: Issues Description | DONE|
 | Chapter 2: Theoretical Basis | DONE|
-| Chapter 3: Program Implementation | |
-| Chapter 4: Experimentation and Analysis | |
+| Chapter 3: Program Implementation | DONE |
+| Chapter 4: Experimentation and Analysis | DONE |
 | Chapter 5: Conclusions and Recommendations | DONE|
-| Bibliography, Appendix | |
+| Bibliography, Appendix | DONE |
 
 
 

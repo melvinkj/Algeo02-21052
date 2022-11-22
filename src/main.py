@@ -32,34 +32,43 @@ def WelcomePage():
     # leftContainer
     leftContainer = Frame(window)
     dirname = os.path.dirname(__file__)
-    welcomeImagePath = os.path.join(dirname, 'assets\image.jpg')
+    welcomeImagePath = os.path.join(dirname, 'assets\welcomeImage.jpg')
 
     welcomeImg = Image.open(welcomeImagePath)
-    wlcmImg = welcomeImg.resize((650, height))
+    wlcmImg_width = int(60/100*height)
+    wlcmImg = welcomeImg.resize((wlcmImg_width, height))
 
     displayImage = ImageTk.PhotoImage(wlcmImg)
 
-    Label(leftContainer, image=displayImage).pack(padx=(0, 0))
+    Label(leftContainer, image=displayImage).pack()
 
     leftContainer.pack(side=tk.LEFT)
 
     # rightContainer
     rightContainer = Frame(window, background=bgColor)
-    rightContainer.grid_rowconfigure(3, weight=1)
+    rightContainer.grid_rowconfigure(4, weight=1)
     rightContainer.grid_columnconfigure(0, weight=1)
 
     title = Label(rightContainer, text="MKJ", font=(
-        "Times", 50), background=bgColor)
+        "Times", 40), background=bgColor)
     title.grid(row=0, column=0, pady=(20, 20))
 
-    subtitle = Label(rightContainer, text="Face Recognition", font=("Times", 100), background=bgColor)
-    subtitle.grid(row=1, column=0, pady=(0, 50))
+    subtitle = Label(rightContainer, text="Face Recognition", font=("Times", 50), background=bgColor)
+    subtitle.grid(row=1, column=0)
+    subsubtitle = Label(rightContainer, text="using Eigenface", font=("Times", 30), background=bgColor)
+    subsubtitle.grid(row=2, column=0, pady=(0, 50))
 
     mainPageBtn = Button(rightContainer, text="Go To Main Page", font=(
         "Times", 20), background=bgColor, command=window.destroy)
-    mainPageBtn.grid(row=2, column=0)
+    mainPageBtn.grid(row=3, column=0)
 
-    rightContainer.pack(pady=(100, 0))
+    memberListContainer = Frame(rightContainer)
+    memberListContainer.grid_rowconfigure(4, weight=1)
+    memberListContainer.grid_columnconfigure(0, weight=1)
+
+    memberListContainer.grid(row =4, column=0)
+
+    rightContainer.pack(pady=(200, 0))
 
     window.mainloop()
 
@@ -97,14 +106,23 @@ def MainPage():
     window.attributes('-fullscreen', True)
 
     # Displaying Title
-    appTitle = Label(window, text="Face Recognition", font=(
-        'Times 50 bold'), background="#f6e3ba", height = 2)
-    appTitle.pack(fill='x')           # Fill = 'x', to set width 100% screen
+    titleContainer = Frame(window, background="#f6e3ba")
+    btnImg = ImageTk.PhotoImage(Image.open(closeBtnPath).resize((60, 60), Image.ANTIALIAS))
+
+    closeBtnContainer = Frame(titleContainer, background="#f6e3ba")
+    closeBtn = tk.Button(closeBtnContainer, image=btnImg, background="#f6e3ba", command=window.destroy)
+    closeBtn.pack(padx=(width - 60, 0))
+    closeBtnContainer.pack(side= tk.TOP)
+
+    appTitle = Label(titleContainer, text="Face Recognition", font=(
+        'Times 50 bold'), background="#f6e3ba", height = 1)
+    appTitle.pack(pady = (0,30), side=tk.BOTTOM)           # Fill = 'x', to set width 100% screen
+
+
+    titleContainer.pack( fill='x')
 
     # Create close button
-    btnImage = PhotoImage(file = closeBtnPath)
-    closeBtn = Button(image=btnImage)
-    closeBtn.place(anchor="ne")
+
 
     # Create leftContainer
     leftContainer = Frame(window, background=bgColor)
@@ -225,7 +243,7 @@ def MainPage():
             # labelImg2.config(image=matchedPath)
             global displayImg2
             displayImg2 = Image.open(matchedPath)
-            displayImg2 = displayImg2.resize((275, 275))
+            displayImg2 = displayImg2.resize((325, 325))
             displayImg2 = ImageTk.PhotoImage(displayImg2)
             labelImg2.config(image=displayImg2)
             resultLabel.config(text=matchedPath.split('/')[-1])
@@ -322,6 +340,6 @@ def MainPage():
 # _____ Main ______
 
 
-# WelcomePage()
+WelcomePage()
 MainPage()
 # CamPage()

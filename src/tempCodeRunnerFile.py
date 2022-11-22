@@ -1,0 +1,1 @@
+ImageTk.PhotoImage(image.resize((325, 325), Image.ANTIALIAS))

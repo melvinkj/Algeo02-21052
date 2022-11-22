@@ -34,9 +34,12 @@ def WelcomePage():
     dirname = os.path.dirname(__file__)
     welcomeImagePath = os.path.join(dirname, 'assets\image.jpg')
 
-    displayImage = ImageTk.PhotoImage(Image.open(welcomeImagePath))
+    welcomeImg = Image.open(welcomeImagePath)
+    wlcmImg = welcomeImg.resize((650, height))
 
-    Label(leftContainer, image=displayImage).pack(padx=(30, 0))
+    displayImage = ImageTk.PhotoImage(wlcmImg)
+
+    Label(leftContainer, image=displayImage).pack(padx=(0, 0))
 
     leftContainer.pack(side=tk.LEFT)
 
@@ -49,8 +52,7 @@ def WelcomePage():
         "Times", 50), background=bgColor)
     title.grid(row=0, column=0, pady=(20, 20))
 
-    subtitle = Label(rightContainer, text="Face Recognition",
-                     font=("Times", 20), background=bgColor)
+    subtitle = Label(rightContainer, text="Face Recognition", font=("Times", 100), background=bgColor)
     subtitle.grid(row=1, column=0, pady=(0, 50))
 
     mainPageBtn = Button(rightContainer, text="Go To Main Page", font=(
@@ -68,6 +70,7 @@ def MainPage():
     print(dirname)
     imagePath1 = os.path.join(dirname, 'assets\profile_icon.png')
     imagePath2 = os.path.join(dirname, 'assets\profile_icon.png')
+    closeBtnPath = os.path.join(dirname, 'assets\close_button.png')
 
     # Konfigurasi awal
     executionTime = "00:00:00"  # ini nanti diubah ke yang asli
@@ -95,8 +98,13 @@ def MainPage():
 
     # Displaying Title
     appTitle = Label(window, text="Face Recognition", font=(
-        'Times', 30), background="#f6e3ba", height=3)
+        'Times 50 bold'), background="#f6e3ba", height = 2)
     appTitle.pack(fill='x')           # Fill = 'x', to set width 100% screen
+
+    # Create close button
+    btnImage = PhotoImage(file = closeBtnPath)
+    closeBtn = Button(image=btnImage)
+    closeBtn.place(anchor="ne")
 
     # Create leftContainer
     leftContainer = Frame(window, background=bgColor)
@@ -124,7 +132,7 @@ def MainPage():
                         text=dataSetName, font=("Times", 12))
     datasetInfo.pack(side=tk.RIGHT, padx=(10, 0))
 
-    dataSetContainer.grid(row=0, column=0, pady=2, padx=20, sticky="e")
+    dataSetContainer.grid(row=0, column=0, pady=2)
 
     # Insert Image container
     userImageContainer = Frame(leftContainer, background=bgColor)
@@ -137,7 +145,7 @@ def MainPage():
         userImageName = filedialog.askopenfilename()
         global displayImg1
         displayImg1 = Image.open(userImageName)
-        displayImg1 = displayImg1.resize((275, 275))
+        displayImg1 = displayImg1.resize((325, 325))
         displayImg1 = ImageTk.PhotoImage(displayImg1)
         labelImg1.config(image=displayImg1)
         userImageInfo.config(text=userImageName.split('/')[-1])
@@ -246,7 +254,7 @@ def MainPage():
 
     resultContainer.grid(row=4, column=0, pady=2)
 
-    leftContainer.pack(padx=100, side=tk.LEFT)
+    leftContainer.pack(padx=(200,0), side=tk.LEFT)
 
     # Create rightContainer
     rightContainer = Frame(window, background=bgColor)
@@ -263,7 +271,7 @@ def MainPage():
     testImageContainer = Frame(displayImagesContainer, background=bgColor)
 
     Label(testImageContainer, text="Test Image", font=(
-        'Times', 18), background=bgColor).pack(side=tk.TOP, pady=5)
+        'Times', 25), background=bgColor).pack(side=tk.TOP, pady=5)
 
     # Contain Image Border and Image 1
     imageBorder1 = Frame(testImageContainer, background="black")
@@ -280,7 +288,7 @@ def MainPage():
     closestImageContainer = Frame(displayImagesContainer, background=bgColor)
 
     Label(closestImageContainer, text="Closest Result", font=(
-        'Times', 18), background=bgColor).pack(side=tk.TOP, pady=5)
+        'Times', 25), background=bgColor).pack(side=tk.TOP, pady=5)
 
     # Contain Image Border and Image 2
     imageBorder2 = Frame(closestImageContainer, background="black")
@@ -300,14 +308,14 @@ def MainPage():
     timeContainer = Frame(rightContainer, background=bgColor)
 
     Label(timeContainer, text="Execution Time : ", font=(
-        'Times', 18), background=bgColor).pack(pady=(30, 0))
+        'Times', 20), background=bgColor).pack(pady=(30, 0))
     exctTime = Label(timeContainer, text=executionTime, font=(
-        'Times', 20), background=bgColor)
+        'Times', 25), background=bgColor)
     exctTime.pack()
 
     timeContainer.pack(side=tk.BOTTOM)
 
-    rightContainer.pack(padx=40, side=tk.RIGHT)
+    rightContainer.pack(padx=(0,100), side=tk.RIGHT)
 
     window.mainloop()
 

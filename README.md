@@ -82,3 +82,4 @@ Contains the report documentation of the program.
  
 ## **Extras**
 <img src="./src/assets/meme.jpg" alt="Face Recog Meme">
+<img src="./src/assets/meme2.jpg" alt="Hamil Jurnal Meme">

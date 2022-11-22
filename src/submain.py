@@ -9,7 +9,7 @@ from PIL import ImageTk, Image
 # Mengembalikan display image yang telah diresize dan dapat digunakan oleh tkinter
 def readImage(path):
     image = Image.open(path)
-    displayimage = ImageTk.PhotoImage(image.resize((275, 275), Image.ANTIALIAS))
+    displayimage = ImageTk.PhotoImage(image.resize((325, 325), Image.ANTIALIAS))
     return displayimage
 
 # PROSEDUR
